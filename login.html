@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login – Shona Laundry</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--blue:#2563eb;--blue-d:#1d4ed8;--green:#16a34a;--red:#dc2626;--wa:#25d366;--wa-d:#128C7E;--gray-900:#0f172a;--gray-700:#334155;--gray-500:#64748b;--gray-200:#e2e8f0;--gray-100:#f1f5f9;--white:#fff;--font:'Poppins',sans-serif;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font);min-height:100vh;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 55%,#1d4ed8 100%);display:flex;align-items:center;justify-content:center;padding:1.5rem;position:relative;overflow:hidden;}
+    .bg-s{position:absolute;border-radius:50%;pointer-events:none;}
+    .s1{width:500px;height:500px;top:-150px;right:-150px;background:radial-gradient(circle,rgba(96,165,250,.12),transparent 70%);}
+    .s2{width:350px;height:350px;bottom:-100px;left:-80px;background:radial-gradient(circle,rgba(37,211,102,.08),transparent 70%);}
+    .wrap{display:grid;grid-template-columns:1fr 1fr;max-width:860px;width:100%;background:var(--white);border-radius:28px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.45);position:relative;z-index:1;}
+    .left{background:linear-gradient(160deg,#0f172a,#1e3a5f,#1d4ed8);padding:2.5rem 2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;}
+    .left img{height:130px;width:auto;object-fit:contain;background:rgba(255,255,255,.1);border-radius:18px;padding:10px;margin-bottom:1.35rem;}
+    .left h2{font-size:1.45rem;font-weight:800;margin-bottom:.4rem;}
+    .left p{font-size:.82rem;opacity:.7;line-height:1.7;max-width:220px;margin-bottom:1.5rem;}
+    .left-list{width:100%;display:flex;flex-direction:column;gap:.6rem;text-align:left;}
+    .li{display:flex;align-items:center;gap:.7rem;background:rgba(255,255,255,.07);border-radius:10px;padding:.6rem .85rem;font-size:.78rem;border:1px solid rgba(255,255,255,.08);}
+    .li strong{display:block;font-size:.8rem;}
+    .li small{opacity:.65;font-size:.72rem;}
+    .right{padding:2.25rem 2rem;display:flex;flex-direction:column;justify-content:center;}
+    .right h3{font-size:1.3rem;font-weight:800;color:var(--gray-900);margin-bottom:.2rem;}
+    .right .sub{font-size:.81rem;color:var(--gray-500);margin-bottom:1.5rem;}
+    .alert{display:none;align-items:center;gap:.5rem;padding:.6rem .9rem;border-radius:9px;font-size:.79rem;margin-bottom:.9rem;}
+    .alert.show{display:flex;}
+    .alert-err{background:#fef2f2;border:1px solid #fca5a5;color:var(--red);}
+    .alert-ok{background:#f0fdf4;border:1px solid #86efac;color:var(--green);}
+    .fg{margin-bottom:1rem;}
+    .fg label{display:block;font-size:.77rem;font-weight:600;color:var(--gray-700);margin-bottom:.28rem;}
+    .ibox{position:relative;}
+    .iico{position:absolute;left:.82rem;top:50%;transform:translateY(-50%);pointer-events:none;font-size:.9rem;}
+    .fg input{width:100%;padding:.72rem .82rem .72rem 2.3rem;border:1.5px solid var(--gray-200);border-radius:10px;font-size:.86rem;font-family:var(--font);color:var(--gray-900);background:var(--gray-100);outline:none;transition:.2s;box-sizing:border-box;}
+    .fg input:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+    .fg input.err{border-color:var(--red);}
+    .ferr{font-size:.72rem;color:var(--red);margin-top:.22rem;display:none;}
+    .ferr.show{display:block;}
+    .eyebtn{position:absolute;right:.82rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:.82rem;color:var(--gray-500);}
+    .forgot{text-align:right;margin-bottom:1.1rem;}
+    .forgot a{font-size:.75rem;color:var(--blue);font-weight:500;text-decoration:none;}
+    .btn-submit{width:100%;padding:.85rem;border:none;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--blue-d));color:#fff;font-size:.92rem;font-weight:700;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:.25s;box-shadow:0 4px 16px rgba(37,99,235,.35);}
+    .btn-submit:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(37,99,235,.45);}
+    .btn-submit:disabled{opacity:.65;cursor:not-allowed;}
+    .spin{width:15px;height:15px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .65s linear infinite;display:none;flex-shrink:0;}
+    @keyframes sp{to{transform:rotate(360deg)}}
+    .divider{display:flex;align-items:center;gap:.65rem;margin:.9rem 0;color:#94a3b8;font-size:.73rem;}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--gray-200);}
+    .btn-wa{width:100%;padding:.72rem;border:none;border-radius:11px;background:linear-gradient(135deg,var(--wa-d),var(--wa));color:#fff;font-size:.84rem;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:.2s;}
+    .btn-wa:hover{opacity:.9;transform:translateY(-2px);}
+    .foot{text-align:center;margin-top:1rem;font-size:.79rem;color:var(--gray-500);}
+    .foot a{color:var(--blue);font-weight:600;text-decoration:none;}
+    .dbox{background:#f8fafc;border:1.5px dashed var(--gray-200);border-radius:10px;padding:.8rem .9rem;margin-top:.9rem;}
+    .dbox-title{font-size:.7rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.45rem;}
+    .dc{display:flex;align-items:center;justify-content:space-between;font-size:.73rem;padding:.22rem 0;border-bottom:1px solid var(--gray-100);}
+    .dc:last-child{border:none;}
+    .dv{font-weight:600;color:var(--gray-900);font-size:.7rem;}
+    .dbtn{background:var(--blue-l,#eff6ff);color:var(--blue);border:none;border-radius:5px;padding:.16rem .48rem;font-size:.67rem;font-weight:700;cursor:pointer;font-family:var(--font);}
+    @media(max-width:680px){.wrap{grid-template-columns:1fr;}.left{display:none;}}
+    @media(max-width:400px){body{padding:.75rem;}.right{padding:1.5rem 1.1rem;}}
+  </style>
+</head>
+<body>
+<div class="bg-s s1"></div>
+<div class="bg-s s2"></div>
+
+<div class="wrap">
+  <!-- Left Panel -->
+  <div class="left">
+        <img src="logo.jpeg" alt="Shona Laundry"
+      style="width:120px;height:120px;object-fit:contain;background:#fff;border-radius:18px;padding:10px;margin-bottom:1rem;box-shadow:0 4px 20px rgba(0,0,0,.25);"
+      onerror="this.style.display='none'"/>
+    <h2>Shona Laundry</h2>
+    <p style="font-size:.75rem;opacity:.65;margin-bottom:.25rem;">Clean · Fluent · Professional</p>
+    Shona Laundry</h2>
+    <p>Clean. Fluent. Professional laundry service in Ujjain, MP.</p>
+    <div class="left-list">
+      <div class="li"><span style="font-size:1.2rem">👤</span><div><strong>User Portal</strong><small>Book pickups &amp; track orders</small></div></div>
+      <div class="li"><span style="font-size:1.2rem">👷</span><div><strong>Manager Portal</strong><small>Manage operations &amp; staff</small></div></div>
+      <div class="li"><span style="font-size:1.2rem">🔴</span><div><strong>Admin Portal</strong><small>Full system control &amp; reports</small></div></div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="right">
+    <h3>Welcome Back! 👋</h3>
+    <div class="sub">Sign in to your Shona Laundry account</div>
+
+    <div class="alert alert-err" id="aErr">❌ <span id="aErrTxt"></span></div>
+    <div class="alert alert-ok"  id="aOk">✅ <span id="aOkTxt"></span></div>
+
+    <form id="loginForm" novalidate>
+      <div class="fg">
+        <label>Email or Phone Number</label>
+        <div class="ibox">
+          <span class="iico">📧</span>
+          <input type="text" id="femail" placeholder="email@example.com or 9XXXXXXXXX" autocomplete="username"/>
+        </div>
+        <div class="ferr" id="ferr1">Please enter your email or phone.</div>
+      </div>
+      <div class="fg">
+        <label>Password</label>
+        <div class="ibox">
+          <span class="iico">🔒</span>
+          <input type="password" id="fpass" placeholder="Enter your password" autocomplete="current-password"/>
+          <button type="button" class="eyebtn" id="eyebtn" onclick="togglePass()">👁️</button>
+        </div>
+        <div class="ferr" id="ferr2">Please enter your password.</div>
+      </div>
+      <div class="forgot"><a href="#">Forgot password?</a></div>
+      <button type="submit" class="btn-submit" id="sbtn">
+        <div class="spin" id="spinEl"></div>
+        <span id="sbtnTxt">Sign In</span>
+      </button>
+    </form>
+
+    <div class="divider">or</div>
+    <button class="btn-wa" onclick="window.open('https://wa.me/919106666146?text=Hello%20Shona%20Laundry!%20I%20want%20to%20login.','_blank')">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Continue with WhatsApp
+    </button>
+
+    <div class="foot">
+      New customer? <a href="register.html">Create Account</a>
+      &nbsp;|&nbsp; <a href="index.html">← Back to Website</a>
+    </div>
+
+    <div class="dbox">
+      <div class="dbox-title">🔑 Demo Credentials — Click "Use" to fill</div>
+      <div class="dc"><span>👤 User</span><span class="dv"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="235650465163504b4c4d420d404c4e">[email&#160;protected]</a> / user123</span><button class="dbtn" onclick="fill('user@shona.com','user123')">Use</button></div>
+      <div class="dc"><span>👷 Manager</span><span class="dv"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d3beb2bdb2b4b6a193a0bbbcbdb2fdb0bcbe">[email&#160;protected]</a> / mgr123</span><button class="dbtn" onclick="fill('manager@shona.com','mgr123')">Use</button></div>
+      <div class="dc"><span>🔴 Admin</span><span class="dv"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3a5b5e5753547a495255545b14595557">[email&#160;protected]</a> / admin123</span><button class="dbtn" onclick="fill('admin@shona.com','admin123')">Use</button></div>
+    </div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  const API_URL = 'http://localhost:3001/api';
+  const ROLE_PATHS = { admin:'admin/index.html', manager:'manager/index.html', user:'user/index.html' };
+
+  // Auto-fill email if coming from registration
+  window.addEventListener('load', () => {
+    const savedEmail = sessionStorage.getItem('reg_email');
+    if (savedEmail) {
+      document.getElementById('femail').value = savedEmail;
+      sessionStorage.removeItem('reg_email');
+    }
+  });
+
+  function togglePass() {
+    const i=document.getElementById('fpass'), b=document.getElementById('eyebtn');
+    i.type=i.type==='password'?'text':'password'; b.textContent=i.type==='password'?'👁️':'🙈';
+  }
+
+  function fill(email, pass) {
+    document.getElementById('femail').value=email;
+    document.getElementById('fpass').value=pass;
+    clearAlerts();
+  }
+
+  function clearAlerts() {
+    document.getElementById('aErr').classList.remove('show');
+    document.getElementById('aOk').classList.remove('show');
+    document.getElementById('ferr1').classList.remove('show');
+    document.getElementById('ferr2').classList.remove('show');
+    document.getElementById('femail').classList.remove('err');
+    document.getElementById('fpass').classList.remove('err');
+  }
+
+  ['femail','fpass'].forEach(id => document.getElementById(id).addEventListener('input',clearAlerts));
+
+  // Demo fallback (when server offline)
+  const DEMO=[
+    {email:'admin@shona.com',   phone:'9999999999', pass:'admin123', role:'admin',   name:'Admin Shona',  id:'1'},
+    {email:'manager@shona.com', phone:'9812345678', pass:'mgr123',   role:'manager', name:'Ravi Manager', id:'2'},
+    {email:'user@shona.com',    phone:'9876543210', pass:'user123',  role:'user',    name:'Priya Sharma', id:'3'},
+  ];
+  function demoLogin(email, pass) {
+    const u=DEMO.find(d=>(d.email===email.toLowerCase()||d.phone===email)&&d.pass===pass);
+    if (!u) return {success:false,message:'Wrong credentials. Try the demo credentials below.'};
+    const pl=btoa(JSON.stringify({id:u.id,email:u.email,name:u.name,role:u.role,exp:Math.floor(Date.now()/1000)+86400}));
+    return {success:true,message:`Welcome back, ${u.name}!`,token:`demo.${pl}.sig`,user:{id:u.id,name:u.name,email:u.email,role:u.role},redirect:ROLE_PATHS[u.role]};
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearAlerts();
+    const em=document.getElementById('femail').value.trim();
+    const pw=document.getElementById('fpass').value;
+    let ok=true;
+    if(!em){document.getElementById('femail').classList.add('err');document.getElementById('ferr1').classList.add('show');ok=false;}
+    if(!pw){document.getElementById('fpass').classList.add('err');document.getElementById('ferr2').classList.add('show');ok=false;}
+    if(!ok) return;
+
+    document.getElementById('spinEl').style.display='block';
+    document.getElementById('sbtnTxt').textContent='Signing in…';
+    document.getElementById('sbtn').disabled=true;
+
+    let result;
+    try {
+      const controller = new AbortController();
+      setTimeout(() => controller.abort(), 5000);
+      const res=await fetch(API_URL+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em,password:pw}),signal:controller.signal});
+      const data=await res.json();
+      // If API success → use it. If API fails → try demo
+      if (data.success) { result=data; }
+      else {
+        const demo=demoLogin(em,pw);
+        result = demo.success ? demo : data;
+      }
+    } catch { result=demoLogin(em,pw); }
+
+    document.getElementById('spinEl').style.display='none';
+    document.getElementById('sbtn').disabled=false;
+    document.getElementById('sbtnTxt').textContent='Sign In';
+
+    if(result.success){
+      localStorage.setItem('shona_token',result.token);
+      localStorage.setItem('shona_user',JSON.stringify(result.user));
+      document.getElementById('aOk').classList.add(

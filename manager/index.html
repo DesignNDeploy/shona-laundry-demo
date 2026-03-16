@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manager Dashboard – Shona Laundry</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="../auth.js"></script>
+  <style>
+    :root {
+      --teal:#0f766e; --teal-d:#134e4a; --teal-l:#f0fdfa;
+      --blue:#2563eb; --blue-l:#eff6ff;
+      --green:#16a34a; --red:#dc2626; --yellow:#d97706;
+      --gray-900:#0f172a; --gray-700:#334155; --gray-500:#64748b;
+      --gray-200:#e2e8f0; --gray-100:#f1f5f9; --white:#fff;
+      --font:'Poppins',sans-serif; --sw:240px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font);background:var(--gray-100);color:var(--gray-700);display:flex;min-height:100vh;}
+
+    /* ── SIDEBAR ── */
+    .sidebar{width:var(--sw);background:linear-gradient(180deg,#0f766e,#134e4a);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;transition:.3s;}
+    .sb-logo{padding:1.2rem 1.3rem;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:.6rem;}
+    .sb-logo img{height:42px;width:auto;object-fit:contain;filter:brightness(0) invert(1);opacity:.92;}
+    .sb-logo-txt{font-size:1rem;font-weight:800;color:#fff;display:none;}
+    .sb-sec{padding:.55rem 1.25rem .2rem;font-size:.64rem;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.09em;margin-top:.5rem;}
+    .sb-item{display:flex;align-items:center;gap:.6rem;padding:.68rem 1.25rem;font-size:.83rem;font-weight:500;color:rgba(255,255,255,.68);cursor:pointer;transition:.18s;border-left:3px solid transparent;}
+    .sb-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+    .sb-item.active{background:rgba(255,255,255,.14);color:#fff;border-left-color:#5eead4;font-weight:600;}
+    .sb-item .ico{font-size:.92rem;width:18px;text-align:center;flex-shrink:0;}
+    .sb-item.logout-item{color:rgba(255,100,100,.8);margin-top:.3rem;}
+    .sb-item.logout-item:hover{background:rgba(220,38,38,.15);color:#fca5a5;}
+    .sb-foot{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,.08);font-size:.72rem;color:rgba(255,255,255,.35);margin-top:auto;}
+
+    /* ── MAIN ── */
+    .main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+
+    /* ── TOPBAR ── */
+    .topbar{background:var(--white);border-bottom:1px solid var(--gray-200);padding:.85rem 1.75rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 6px rgba(0,0,0,.06);}
+    .tb-left{display:flex;align-items:center;gap:.85rem;}
+    .tb-title{font-size:1rem;font-weight:700;color:var(--gray-900);}
+    .tb-page-name{font-size:.8rem;color:var(--gray-500);font-weight:500;}
+    .tb-right{display:flex;align-items:center;gap:.8rem;}
+    .tb-pill{background:#ccfbf1;color:var(--teal);padding:.25rem .75rem;border-radius:100px;font-size:.75rem;font-weight:600;}
+    .tb-name{font-size:.83rem;font-weight:600;color:var(--gray-700);}
+    .tb-av{width:34px;height:34px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.85rem;flex-shrink:0;}
+    .btn-logout{background:#fee2e2;color:var(--red);border:none;border-radius:8px;padding:.3rem .85rem;font-size:.75rem;font-weight:600;cursor:pointer;font-family:var(--font);transition:.2s;}
+    .btn-logout:hover{background:#fecaca;}
+    .menu-toggle{display:none;background:var(--gray-100);border:1.5px solid var(--gray-200);color:var(--gray-700);width:36px;height:36px;border-radius:8px;font-size:1.1rem;cursor:pointer;align-items:center;justify-content:center;}
+
+    /* ── CONTENT ── */
+    .content{padding:1.75rem;flex:1;}
+
+    /* ── PAGES ── */
+    .page{display:none;flex-direction:column;gap:1.25rem;animation:fadeIn .25s ease;}
+    .page.active{display:flex;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ── STATS ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1rem;}
+    .stat-card{background:var(--white);border-radius:13px;padding:1.3rem;border:1.5px solid var(--gray-200);transition:.2s;}
+    .stat-card:hover{box-shadow:0 4px 16px rgba(15,118,110,.12);transform:translateY(-2px);}
+    .s-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-bottom:.75rem;}
+    .si-teal{background:#ccfbf1;} .si-blue{background:#dbeafe;} .si-yellow{background:#fef9c3;} .si-green{background:#dcfce7;} .si-red{background:#fee2e2;} .si-purple{background:#ede9fe;}
+    .s-val{font-size:1.75rem;font-weight:800;color:var(--gray-900);margin-bottom:.15rem;}
+    .s-lbl{font-size:.76rem;color:var(--gray-500);}
+
+    /* ── SECTION BAR ── */
+    .sec-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.9rem;}
+    .sec-bar h3{font-size:.94rem;font-weight:700;color:var(--gray-900);}
+
+    /* ── BUTTONS ── */
+    .btn{display:inline-flex;align-items:center;gap:.35rem;padding:.42rem .95rem;border-radius:100px;font-size:.77rem;font-weight:600;cursor:pointer;border:none;font-family:var(--font);transition:.2s;}
+    .btn-teal{background:var(--teal);color:#fff;} .btn-teal:hover{background:var(--teal-d);}
+    .btn-blue{background:var(--blue);color:#fff;} .btn-blue:hover{opacity:.9;}
+    .btn-out{border:1.5px solid var(--gray-200);color:var(--gray-700);background:var(--white);} .btn-out:hover{border-color:var(--teal);color:var(--teal);}
+    .btn-red{background:var(--red);color:#fff;} .btn-red:hover{opacity:.9;}
+    .btn-sm{padding:.28rem .65rem;font-size:.73rem;border-radius:7px;}
+    .btn-full{width:100%;justify-content:center;padding:.8rem;border-radius:10px;font-size:.88rem;}
+
+    /* ── TABLE ── */
+    .table-card{background:var(--white);border-radius:13px;border:1.5px solid var(--gray-200);overflow:hidden;}
+    .table-scroll{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    thead{background:var(--gray-100);}
+    th{padding:.72rem 1rem;text-align:left;font-size:.72rem;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+    td{padding:.8rem 1rem;font-size:.83rem;color:var(--gray-700);border-bottom:1px solid var(--gray-100);}
+    tr:last-child td{border:none;}
+    tr:hover td{background:#f0fdfa;}
+
+    /* ── BADGE ── */
+    .badge{display:inline-block;padding:.2rem .65rem;border-radius:100px;font-size:.7rem;font-weight:600;}
+    .b-p {background:#fef9c3;color:var(--yellow);}
+    .b-pr{background:#dbeafe;color:var(--blue);}
+    .b-d {background:#dcfce7;color:var(--green);}
+    .b-t {background:#ccfbf1;color:var(--teal);}
+    .b-r {background:#fee2e2;color:var(--red);}
+    .b-av{background:#dcfce7;color:var(--green);}
+
+    /* ── CARD ── */
+    .card{background:var(--white);border-radius:13px;border:1.5px solid var(--gray-200);overflow:hidden;}
+    .card-head{padding:.9rem 1.3rem;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;}
+    .card-head h3{font-size:.92rem;font-weight:700;color:var(--gray-900);}
+    .card-body{padding:1.3rem;}
+
+    /* ── GRID 2 ── */
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;}
+
+    /* ── INFO BOX ── */
+    .info-box{background:var(--white);border-radius:13px;border:1.5px solid var(--gray-200);padding:1.25rem;}
+    .info-box h4{font-size:.88rem;font-weight:700;color:var(--gray-900);margin-bottom:.9rem;}
+
+    /* ── TASK ── */
+    .task-item{display:flex;align-items:center;gap:.65rem;padding:.58rem 0;border-bottom:1px solid var(--gray-100);}
+    .task-item:last-child{border:none;}
+    .task-checkbox{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--gray-200);cursor:pointer;flex-shrink:0;accent-color:var(--teal);}
+    .task-checkbox:checked + .t-txt{text-decoration:line-through;color:var(--gray-500);}
+    .tdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+    .td-g{background:#22c55e;} .td-y{background:#f59e0b;} .td-b{background:#3b82f6;} .td-r{background:#ef4444;}
+    .t-txt{flex:1;font-size:.81rem;}
+    .t-time{font-size:.72rem;color:var(--gray-500);white-space:nowrap;}
+
+    /* ── FORM ── */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .fg{display:flex;flex-direction:column;gap:.28rem;}
+    .fg label{font-size:.76rem;font-weight:600;color:var(--gray-700);}
+    .fg input,.fg select,.fg textarea{padding:.68rem .9rem;border:1.5px solid var(--gray-200);border-radius:9px;font-size:.84rem;font-family:var(--font);color:var(--gray-900);background:var(--gray-100);outline:none;transition:.2s;}
+    .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--teal);background:var(--white);box-shadow:0 0 0 3px rgba(15,118,110,.1);}
+    .fg textarea{resize:vertical;min-height:80px;}
+    .fg-full{grid-column:1/-1;}
+
+    /* ── STATUS UPDATE MODAL ── */
+    .modal-overlay{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:.25s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal{background:var(--white);border-radius:18px;padding:1.75rem;width:100%;max-width:420px;box-shadow:0 24px 80px rgba(0,0,0,.3);transform:scale(.95);transition:.25s;}
+    .modal-overlay.open .modal{transform:scale(1);}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;}
+    .modal-head h3{font-size:.97rem;font-weight:700;color:var(--gray-900);}
+    .modal-close{background:var(--gray-100);border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;font-size:.9rem;display:flex;align-items:center;justify-content:center;}
+
+    /* ── CHARTS ── */
+    .mini-chart{display:flex;align-items:flex-end;gap:.4rem;height:100px;padding-top:.5rem;}
+    .mc-bar{flex:1;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--teal),#5eead4);min-width:0;}
+    .mc-labels{display:flex;gap:.4rem;margin-top:.35rem;}
+    .mc-lbl{flex:1;text-align:center;font-size:.62rem;color:var(--gray-500);}
+
+    /* ── FILTER SELECT ── */
+    .filter-sel{padding:.36rem .75rem;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.78rem;font-family:var(--font);color:var(--gray-700);outline:none;cursor:pointer;background:var(--white);}
+
+    /* ── TOAST ── */
+    .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--gray-900);color:#fff;padding:.7rem 1.4rem;border-radius:100px;font-size:.83rem;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:9999;opacity:0;transition:opacity .3s,transform .3s;white-space:nowrap;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:960px){
+      :root{--sw:200px;}
+    }
+    @media(max-width:720px){
+      .sidebar{transform:translateX(-100%);z-index:200;}
+      .sidebar.open{transform:translateX(0);}
+      .main{margin-left:0;}
+      .menu-toggle{display:flex;}
+      .content{padding:1.1rem;}
+      .grid-2{grid-template-columns:1fr;}
+      .stats-grid{grid-template-columns:1fr 1fr;}
+      .form-grid{grid-template-columns:1fr;}
+    }
+    @media(max-width:480px){
+      .stats-grid{grid-template-columns:1fr 1fr;}
+      .topbar{padding:.75rem 1rem;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <img src="../logo.jpeg" alt="Shona Laundry"
+      onerror="this.style.display='none';document.querySelector('.sb-logo-txt').style.display='block'"/>
+    <span class="sb-logo-txt">🫧 Shona Laundry</span>
+  </div>
+  <nav>
+    <div class="sb-sec">Operations</div>
+    <div class="sb-item active" data-page="overview"  onclick="goPage('overview',this)">
+      <span class="ico">📊</span> Overview
+    </div>
+    <div class="sb-item" data-page="pickups"   onclick="goPage('pickups',this)">
+      <span class="ico">🚗</span> Today's Pickups
+    </div>
+    <div class="sb-item" data-page="transit"   onclick="goPage('transit',this)">
+      <span class="ico">🚚</span> In Transit
+    </div>
+    <div class="sb-item" data-page="completed" onclick="goPage('completed',this)">
+      <span class="ico">✅</span> Completed
+    </div>
+    <div class="sb-sec">Management</div>
+    <div class="sb-item" data-page="customers" onclick="goPage('customers',this)">
+      <span class="ico">👥</span> Customers
+    </div>
+    <div class="sb-item" data-page="invoices"  onclick="goPage('invoices',this)">
+      <span class="ico">🧾</span> Invoices
+    </div>
+    <div class="sb-item" data-page="inventory" onclick="goPage('inventory',this)">
+      <span class="ico">📦</span> Inventory
+    </div>
+    <div class="sb-sec">Staff</div>
+    <div class="sb-item" data-page="staff"     onclick="goPage('staff',this)">
+      <span class="ico">🚴</span> Delivery Boys
+    </div>
+    <div class="sb-item" data-page="support"   onclick="goPage('support',this)">
+      <span class="ico">📞</span> Support
+    </div>
+    <div class="sb-sec">Account</div>
+    <div class="sb-item logout-item" onclick="doLogout()">
+      <span class="ico">🚪</span> Logout
+    </div>
+  </nav>
+  <div class="sb-foot">Manager Panel v2.0</div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="tb-left">
+      <button class="menu-toggle" id="menuToggle">☰</button>
+      <div>
+        <div class="tb-title">Manager Dashboard</div>
+        <div class="tb-page-name" id="pageName">Overview</div>
+      </div>
+    </div>
+    <div class="tb-right">
+      <span class="tb-pill">Manager</span>
+      <span class="tb-name" id="mgrName">Ravi Manager</span>
+      <div class="tb-av" id="mgrAv">R</div>
+      <button class="btn-logout" onclick="doLogout()">🚪 Logout</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ════ PAGE: OVERVIEW ════ -->
+    <div class="page active" id="page-overview">
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="s-ico si-teal">🚗</div>
+          <div class="s-val">8</div>
+          <div class="s-lbl">Today's Pickups</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-ico si-blue">🫧</div>
+          <div class="s-val">14</div>
+          <div class="s-lbl">In Cleaning</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-ico si-yellow">🚚</div>
+          <div class="s-val">6</div>
+          <div class="s-lbl">Out for Delivery</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-ico si-green">✅</div>
+          <div class="s-val">23</div>
+          <div class="s-lbl">Completed Today</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card">
+        <div class="card-head"><h3>⚡ Quick Actions</h3></div>
+        <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.85rem;">
+          <button class="btn btn-teal btn-full" onclick="goPage('pickups',document.querySelector('[data-page=pickups]'))">🚗 View Pickups</button>
+          <button class="btn btn-out btn-full"  onclick="goPage('staff',document.querySelector('[data-page=staff]'))">🚴 Manage Staff</button>
+          <button class="btn btn-out btn-full"  onclick="goPage('transit',document.querySelector('[data-page=transit]'))">🚚 In Transit</button>
+          <button class="btn btn-out btn-full"  onclick="goPage('invoices',document.querySelector('[data-page=invoices]'))">🧾 Invoices</button>
+        </div>
+      </div>
+
+      <!-- Weekly chart + staff -->
+      <div class="grid-2">
+        <div class="info-box">
+          <h4>📈 This Week's Pickups</h4>
+          <div class="mini-chart">
+            <div class="mc-bar" style="height:55%"></div>
+            <div class="mc-bar" style="height:70%"></div>
+            <div class="mc-bar" style="height:45%"></div>
+            <div class="mc-bar" style="height:88%"></div>
+            <div class="mc-bar" style="height:65%"></div>
+            <div class="mc-bar" style="height:100%;background:linear-gradient(180deg,#16a34a,#22c55e)"></div>
+            <div class="mc-bar" style="height:80%"></div>
+          </div>
+          <div class="mc-labels">
+            <div class="mc-lbl">Mon</div><div class="mc-lbl">Tue</div><div class="mc-lbl">Wed</div>
+            <div class="mc-lbl">Thu</div><div class="mc-lbl">Fri</div><div class="mc-lbl">Sat</div><div class="mc-lbl">Sun</div>
+          </div>
+        </div>
+        <div class="info-box">
+          <h4>🚴 Staff Status</h4>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr>
+                <th style="padding:.4rem .5rem;font-size:.7rem;color:var(--gray-500);text-align:left;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Staff</th>
+                <th style="padding:.4rem .5rem;font-size:.7rem;color:var(--gray-500);text-align:left;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Jobs</th>
+                <th style="padding:.4rem .5rem;font-size:.7rem;color:var(--gray-500);text-align:left;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--gray-100);">
+                <td style="padding:.5rem .5rem;font-size:.82rem;font-weight:500;">Ravi Kumar</td>
+                <td style="padding:.5rem .5rem;font-size:.82rem;">3</td>
+                <td><span class="badge b-pr">On Duty</span></td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--gray-100);">
+                <td style="padding:.5rem .5rem;font-size:.82rem;font-weight:500;">Suresh Patel</td>
+                <td style="padding:.5rem .5rem;font-size:.82rem;">2</td>
+                <td><span class="badge b-t">In Transit</span></td>
+              </tr>
+              <tr>
+                <td style="padding:.5rem .5rem;font-size:.82rem;font-weight:500;">Mohan Singh</td>
+                <td style="padding:.5rem .5rem;font-size:.82rem;">0</td>
+                <td><span class="badge b-av">Available</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Today's tasks -->
+      <div class="card">
+        <div class="card-head">
+          <h3>📝 Today's Tasks</h3>
+          <button class="btn btn-out btn-sm" onclick="addTask()">+ Add Task</button>
+        </div>
+        <div class="card-body" id="taskList">
+          <div class="task-item">
+            <input type="checkbox" class="task-checkbox" onchange="this.nextElementSibling.style.textDecoration=this.checked?'line-through':'none';this.nextElementSibling.style.color=this.checked?'var(--gray-500)':''"/>
+            <div class="tdot td-g"></div>
+            <span class="t-txt">Confirm pickup for Hotel Amber</span>
+            <span class="t-time">9:00 AM</span>
+          </div>
+          <div class="task-item">
+            <input type="checkbox" class="task-checkbox" onchange="this.nextElementSibling.style.textDecoration=this.checked?'line-through':'none';this.nextElementSibling.style.color=this.checked?'var(--gray-500)':''"/>
+            <div class="tdot td-y"></div>
+            <span class="t-txt">Assign delivery staff for City Hospital</span>
+            <span class="t-time">1:00 PM</span>
+          </div>
+          <div class="task-item">
+            <input type="checkbox" class="task-checkbox" onchange="this.nextElementSibling.style.textDecoration=this.checked?'line-through':'none';this.nextElementSibling.style.color=this.checked?'var(--gray-500)':''"/>
+            <div class="tdot td-b"></div>
+            <span class="t-txt">Check inventory – bed sheets running low</span>
+            <span class="t-time">3:00 PM</span>
+          </div>
+          <div class="task-item">
+            <input type="checkbox" class="task-checkbox" onchange="this.nextElementSibling.style.textDecoration=this.checked?'line-through':'none';this.nextElementSibling.style.color=this.checked?'var(--gray-500)':''"/>
+            <div class="tdot td-r"></div>
+            <span class="t-txt">Invoice pending for Glow Salon</span>
+            <span class="t-time">5:00 PM</span>
+          </div>
+          <div class="task-item">
+            <input type="checkbox" class="task-checkbox" onchange="this.nextElementSibling.style.textDecoration=this.checked?'line-through':'none';this.nextElementSibling.style.color=this.checked?'var(--gray-500)':''"/>
+            <div class="tdot td-g"></div>
+            <span class="t-txt">End-of-day delivery report</span>
+            <span class="t-time">8:00 PM</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /overview -->
+
+    <!-- ════ PAGE: TODAY'S PICKUPS ════ -->
+    <div class="page" id="page-pickups">
+      <div class="sec-bar">
+        <h3>🚗 Today's Pickup Schedule</h3>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <select class="filter-sel" onchange="filterPickups(this.value)">
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="picked">Picked Up</option>
+            <option value="transit">In Transit</option>
+          </select>
+          <button class="btn btn-teal btn-sm" onclick="openModal('addPickupModal')">+ Add Booking</button>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Customer</th><th>Phone</th><th>Address</th><th>Service</th><th>Time Slot</th><th>Staff</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="pickupsTable">
+              <tr data-status="picked">
+                <td>#B001</td><td>Priya Sharma</td><td>9876543210</td><td>Freeganj, Ujjain</td><td>Home Laundry</td><td>8–10 AM</td><td>Ravi</td>
+                <td><span class="badge b-d">Picked Up</span></td>
+                <td><button class="btn btn-out btn-sm" onclick="openStatusModal('#B001','Priya Sharma')">Update</button></td>
+              </tr>
+              <tr data-status="transit">
+                <td>#B002</td><td>Hotel Amber</td><td>9812341234</td><td>Mahakal Road</td><td>Restaurant</td><td>10–12 PM</td><td>Suresh</td>
+                <td><span class="badge b-t">In Transit</span></td>
+                <td><button class="btn btn-out btn-sm" onclick="openStatusModal('#B002','Hotel Amber')">Update</button></td>
+              </tr>
+              <tr data-status="pending">
+                <td>#B003</td><td>Glow Salon</td><td>9998887776</td><td>Tower Chowk</td><td>Salon &amp; Spa</td><td>12–2 PM</td><td>Ravi</td>
+                <td><span class="badge b-p">Pending</span></td>
+                <td><button class="btn btn-out btn-sm" onclick="openStatusModal('#B003','Glow Salon')">Update</button></td>
+              </tr>
+              <tr data-status="pending">
+                <td>#B004</td><td>City Hospital</td><td>9765432109</td><td>Dewas Road</td><td>Hospital</td><td>2–4 PM</td><td>—</td>
+                <td><span class="badge b-p">Pending</span></td>
+                <td><button class="btn btn-teal btn-sm" onclick="openAssignModal('#B004','City Hospital')">Assign Staff</button></td>
+              </tr>
+              <tr data-status="transit">
+                <td>#B005</td><td>Sunita Verma</td><td>9123456780</td><td>Teen Batti</td><td>Express</td><td>4–6 PM</td><td>Suresh</td>
+                <td><span class="badge b-pr">Assigned</span></td>
+                <td><button class="btn btn-out btn-sm" onclick="openStatusModal('#B005','Sunita Verma')">Update</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /pickups -->
+
+    <!-- ════ PAGE: IN TRANSIT ════ -->
+    <div class="page" id="page-transit">
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));">
+        <div class="stat-card"><div class="s-ico si-yellow">📦</div><div class="s-val">6</div><div class="s-lbl">Out for Delivery</div></div>
+        <div class="stat-card"><div class="s-ico si-blue">🫧</div><div class="s-val">14</div><div class="s-lbl">In Cleaning</div></div>
+        <div class="stat-card"><div class="s-ico si-teal">✅</div><div class="s-val">3</div><div class="s-lbl">Packed &amp; Ready</div></div>
+      </div>
+      <div class="sec-bar"><h3>🚚 In Transit Orders</h3></div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>#</th><th>Customer</th><th>Items</th><th>Ready Since</th><th>Deliver By</th><th>Staff</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>#B001</td><td>Priya Sharma</td><td>Bed sheets ×4, Towels ×2</td><td>11:00 AM</td><td>6:00 PM</td><td>Ravi</td><td><span class="badge b-pr">Packed</span></td><td><button class="btn btn-out btn-sm" onclick="openStatusModal('#B001','Priya Sharma')">Update</button></td></tr>
+              <tr><td>#B002</td><td>Hotel Amber</td><td>Table Cloths ×10, Napkins ×20</td><td>1:30 PM</td><td>6:30 PM</td><td>Suresh</td><td><span class="badge b-t">Out for Delivery</span></td><td><button class="btn btn-out btn-sm" onclick="openStatusModal('#B002','Hotel Amber')">Update</button></td></tr>
+              <tr><td>#D008</td><td>Rahul Mehta</td><td>Shirts ×6, Trousers ×3</td><td>2:00 PM</td><td>7:00 PM</td><td>Mohan</td><td><span class="badge b-p">Pending</span></td><td><button class="btn btn-teal btn-sm" onclick="openAssignModal('#D008','Rahul Mehta')">Assign</button></td></tr>
+              <tr><td>#D003</td><td>Glow Salon</td><td>Salon towels ×10, Gowns ×3</td><td>3:30 PM</td><td>7:30 PM</td><td>Suresh</td><td><span class="badge b-t">Out for Delivery</span></td><td><button class="btn btn-out btn-sm" onclick="openStatusModal('#D003','Glow Salon')">Update</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /transit -->
+
+    <!-- ════ PAGE: COMPLETED ════ -->
+    <div class="page" id="page-completed">
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));">
+        <div class="stat-card"><div class="s-ico si-green">✅</div><div class="s-val">23</div><div class="s-lbl">Completed Today</div></div>
+        <div class="stat-card"><div class="s-ico si-teal">📅</div><div class="s-val">142</div><div class="s-lbl">This Week</div></div>
+        <div class="stat-card"><div class="s-ico si-blue">📈</div><div class="s-val">98%</div><div class="s-lbl">On-Time Rate</div></div>
+      </div>
+      <div class="sec-bar">
+        <h3>✅ Completed Orders</h3>
+        <select class="filter-sel">
+          <option>Today</option><option>This Week</option><option>This Month</option>
+        </select>
+      </div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>#</th><th>Customer</th><th>Service</th><th>Amount</th><th>Delivered At</th><th>Staff</th><th>Rating</th></tr></thead>
+            <tbody>
+              <tr><td>#A001</td><td>Priya Sharma</td><td>Home Laundry</td><td>₹200</td><td>11:00 AM</td><td>Ravi</td><td>⭐⭐⭐⭐⭐</td></tr>
+              <tr><td>#A002</td><td>Rahul Joshi</td><td>Express Laundry</td><td>₹480</td><td>12:30 PM</td><td>Suresh</td><td>⭐⭐⭐⭐⭐</td></tr>
+              <tr><td>#A003</td><td>Sunita Verma</td><td>Restaurant Laundry</td><td>₹680</td><td>2:00 PM</td><td>Mohan</td><td>⭐⭐⭐⭐</td></tr>
+              <tr><td>#A004</td><td>Dr. Mehta Clinic</td><td>Hospital Laundry</td><td>₹1,200</td><td>4:00 PM</td><td>Ravi</td><td>⭐⭐⭐⭐⭐</td></tr>
+              <tr><td>#A005</td><td>Beauty World Salon</td><td>Salon &amp; Spa</td><td>₹360</td><td>5:30 PM</td><td>Suresh</td><td>⭐⭐⭐⭐</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /completed -->
+
+    <!-- ════ PAGE: CUSTOMERS ════ -->
+    <div class="page" id="page-customers">
+      <div class="sec-bar">
+        <h3>👥 Customer List</h3>
+        <div style="display:flex;gap:.5rem;">
+          <input type="text" placeholder="Search customer…" style="padding:.38rem .85rem;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.8rem;font-family:var(--font);outline:none;width:200px;" oninput="searchCustomers(this.value)"/>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Customer</th><th>Phone</th><th>Type</th><th>Total Orders</th><th>Last Order</th><th>Status</th></tr></thead>
+            <tbody id="customersTable">
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:30px;height:30px;border-radius:50%;background:#dbeafe;color:#2563eb;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;">P</div>Priya Sharma</div></td><td>9876543210</td><td>Home</td><td>24</td><td>13 Mar 2026</td><td><span class="badge b-d">Active</span></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:30px;height:30px;border-radius:50%;background:#ccfbf1;color:#0f766e;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;">H</div>Hotel Amber</div></td><td>9812341234</td><td>Restaurant</td><td>18</td><td>13 Mar 2026</td><td><span class="badge b-d">Active</span></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:30px;height:30px;border-radius:50%;background:#fdf4ff;color:#7e22ce;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;">G</div>Glow Salon</div></td><td>9998887776</td><td>Salon &amp; Spa</td><td>12</td><td>13 Mar 2026</td><td><span class="badge b-d">Active</span></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:30px;height:30px;border-radius:50%;background:#fee2e2;color:#dc2626;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;">C</div>City Hospital</div></td><td>9765432109</td><td>Hospital</td><td>32</td><td>13 Mar 2026</td><td><span class="badge b-d">Active</span></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:30px;height:30px;border-radius:50%;background:#fef9c3;color:#d97706;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;">S</div>Sunita Verma</div></td><td>9123456780</td><td>Home</td><td>8</td><td>12 Mar 2026</td><td><span class="badge b-d">Active</span></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:30px;height:30px;border-radius:50%;background:#ede9fe;color:#7c3aed;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;">R</div>Rahul Mehta</div></td><td>9876501234</td><td>Home</td><td>5</td><td>10 Mar 2026</td><td><span class="badge b-pr">New</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /customers -->
+
+    <!-- ════ PAGE: INVOICES ════ -->
+    <div class="page" id="page-invoices">
+      <div class="sec-bar">
+        <h3>🧾 Invoices</h3>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <select class="filter-sel"><option>All</option><option>Paid</option><option>Pending</option></select>
+          <button class="btn btn-teal btn-sm" onclick="showToast('Invoice generation coming soon!')">+ Generate Invoice</button>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Invoice #</th><th>Customer</th><th>Service</th><th>Amount</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>INV-001</td><td>Priya Sharma</td><td>Home Laundry</td><td>₹200</td><td>10 Mar 2026</td><td><span class="badge b-d">Paid</span></td><td><button class="btn btn-out btn-sm" onclick="showToast('Downloading invoice INV-001…')">📥 Download</button></td></tr>
+              <tr><td>INV-002</td><td>Hotel Amber</td><td>Restaurant</td><td>₹1,200</td><td>11 Mar 2026</td><td><span class="badge b-p">Pending</span></td><td><button class="btn btn-out btn-sm" onclick="showToast('Downloading invoice INV-002…')">📥 Download</button></td></tr>
+              <tr><td>INV-003</td><td>Glow Salon</td><td>Salon &amp; Spa</td><td>₹360</td><td>12 Mar 2026</td><td><span class="badge b-d">Paid</span></td><td><button class="btn btn-out btn-sm" onclick="showToast('Downloading invoice INV-003…')">📥 Download</button></td></tr>
+              <tr><td>INV-004</td><td>City Hospital</td><td>Hospital</td><td>₹2,400</td><td>12 Mar 2026</td><td><span class="badge b-p">Pending</span></td><td><button class="btn btn-teal btn-sm" onclick="showToast('Reminder sent via WhatsApp!')">💬 Remind</button></td></tr>
+              <tr><td>INV-005</td><td>Sunita Verma</td><td>Express</td><td>₹480</td><td>13 Mar 2026</td><td><span class="badge b-d">Paid</span></td><td><button class="btn btn-out btn-sm" onclick="showToast('Downloading invoice INV-005…')">📥 Download</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /invoices -->
+
+    <!-- ════ PAGE: INVENTORY ════ -->
+    <div class="page" id="page-inventory">
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));">
+        <div class="stat-card"><div class="s-ico si-green">✅</div><div class="s-val">12</div><div class="s-lbl">Items in Stock</div></div>
+        <div class="stat-card"><div class="s-ico si-red">⚠️</div><div class="s-val">3</div><div class="s-lbl">Low Stock Alerts</div></div>
+        <div class="stat-card"><div class="s-ico si-blue">📦</div><div class="s-val">248</div><div class="s-lbl">Total Units</div></div>
+      </div>
+      <div class="sec-bar"><h3>📦 Inventory Status</h3><button class="btn btn-teal btn-sm" onclick="showToast('Reorder request sent!')">+ Reorder</button></div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Item</th><th>Category</th><th>Stock</th><th>Min Required</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>Detergent (5kg)</td><td>Cleaning</td><td>8 packs</td><td>5</td><td><span class="badge b-d">OK</span></td><td><button class="btn btn-out btn-sm" onclick="showToast('Updated!')">Update</button></td></tr>
+              <tr><td>Fabric Softener</td><td>Cleaning</td><td>2 bottles</td><td>5</td><td><span class="badge b-r">Low Stock</span></td><td><button class="btn btn-teal btn-sm" onclick="showToast('Reorder placed!')">Reorder</button></td></tr>
+              <tr><td>Bed Sheet Bags</td><td>Packaging</td><td>120 pcs</td><td>50</td><td><span class="badge b-d">OK</span></td><td><button class="btn btn-out btn-sm" onclick="showToast('Updated!')">Update</button></td></tr>
+              <tr><td>Garment Bags</td><td>Packaging</td><td>18 pcs</td><td>30</td><td><span class="badge b-r">Low Stock</span></td><td><button class="btn btn-teal btn-sm" onclick="showToast('Reorder placed!')">Reorder</button></td></tr>
+              <tr><td>Stain Remover</td><td>Cleaning</td><td>4 bottles</td><td>6</td><td><span class="badge b-r">Low Stock</span></td><td><button class="btn btn-teal btn-sm" onclick="showToast('Reorder placed!')">Reorder</button></td></tr>
+              <tr><td>Hangers</td><td>Equipment</td><td>85 pcs</td><td>40</td><td><span class="badge b-d">OK</span></td><td><button class="btn btn-out btn-sm" onclick="showToast('Updated!')">Update</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /inventory -->
+
+    <!-- ════ PAGE: DELIVERY STAFF ════ -->
+    <div class="page" id="page-staff">
+      <div class="sec-bar">
+        <h3>🚴 Delivery Staff</h3>
+        <button class="btn btn-teal btn-sm" onclick="openModal('addStaffModal')">+ Add Staff</button>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));margin-bottom:.5rem;">
+        <div class="stat-card"><div class="s-ico si-green">🚴</div><div class="s-val">3</div><div class="s-lbl">Total Staff</div></div>
+        <div class="stat-card"><div class="s-ico si-teal">✅</div><div class="s-val">2</div><div class="s-lbl">On Duty</div></div>
+        <div class="stat-card"><div class="s-ico si-blue">📦</div><div class="s-val">7</div><div class="s-lbl">Active Jobs</div></div>
+      </div>
+      <div class="table-card" style="margin-top:.5rem;">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Staff</th><th>Phone</th><th>Area</th><th>Active Jobs</th><th>Today's Deliveries</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:32px;height:32px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;">R</div><div><div style="font-size:.84rem;font-weight:600;color:var(--gray-900);">Ravi Kumar</div><div style="font-size:.72rem;color:var(--gray-500);">2 yrs experience</div></div></div></td>
+                <td>9876500001</td><td>Freeganj</td><td>3</td><td>8</td>
+                <td><span class="badge b-pr">On Duty</span></td>
+                <td><button class="btn btn-out btn-sm" onclick="showToast('Ravi Kumar updated!')">Edit</button></td>
+              </tr>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:32px;height:32px;border-radius:50%;background:#0f766e;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;">S</div><div><div style="font-size:.84rem;font-weight:600;color:var(--gray-900);">Suresh Patel</div><div style="font-size:.72rem;color:var(--gray-500);">3 yrs experience</div></div></div></td>
+                <td>9876500002</td><td>Mahakal Rd</td><td>2</td><td>6</td>
+                <td><span class="badge b-t">In Transit</span></td>
+                <td><button class="btn btn-out btn-sm" onclick="showToast('Suresh Patel updated!')">Edit</button></td>
+              </tr>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:32px;height:32px;border-radius:50%;background:#5eead4;color:#134e4a;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;">M</div><div><div style="font-size:.84rem;font-weight:600;color:var(--gray-900);">Mohan Singh</div><div style="font-size:.72rem;color:var(--gray-500);">1 yr experience</div></div></div></td>
+                <td>9876500003</td><td>Dewas Rd</td><td>0</td><td>5</td>
+                <td><span class="badge b-av">Available</span></td>
+                <td><button class="btn btn-teal btn-sm" onclick="showToast('Assigned to next job!')">Assign Job</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /staff -->
+
+    <!-- ════ PAGE: SUPPORT ════ -->
+    <div class="page" id="page-support">
+      <div class="sec-bar"><h3>📞 Customer Support</h3></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h3>📋 Open Issues</h3><span class="badge b-r">3 Open</span></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:.85rem;">
+              <div style="border:1.5px solid #fca5a5;border-radius:10px;padding:.9rem;background:#fff5f5;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:.35rem;"><span style="font-size:.82rem;font-weight:700;color:var(--gray-900);">Priya Sharma — #B002</span><span class="badge b-r">Urgent</span></div>
+                <div style="font-size:.79rem;color:var(--gray-500);">Clothes not delivered yet. Expected by 6 PM.</div>
+                <div style="margin-top:.6rem;"><a href="https://wa.me/919876543210" target="_blank" class="btn btn-sm" style="background:#25d366;color:#fff;border:none;font-family:var(--font);cursor:pointer;">💬 Reply on WhatsApp</a></div>
+              </div>
+              <div style="border:1.5px solid #fde68a;border-radius:10px;padding:.9rem;background:#fffbeb;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:.35rem;"><span style="font-size:.82rem;font-weight:700;color:var(--gray-900);">Hotel Amber — Invoice</span><span class="badge b-p">Medium</span></div>
+                <div style="font-size:.79rem;color:var(--gray-500);">Invoice INV-002 payment pending. Follow up required.</div>
+                <div style="margin-top:.6rem;"><button class="btn btn-out btn-sm" onclick="showToast('Reminder sent!')">Send Reminder</button></div>
+              </div>
+              <div style="border:1.5px solid var(--gray-200);border-radius:10px;padding:.9rem;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:.35rem;"><span style="font-size:.82rem;font-weight:700;color:var(--gray-900);">Glow Salon — Quality</span><span class="badge b-pr">Low</span></div>
+                <div style="font-size:.79rem;color:var(--gray-500);">Customer reported stain on one gown. Replacement needed.</div>
+                <div style="margin-top:.6rem;"><button class="btn btn-out btn-sm" onclick="showToast('Issue escalated!')">Escalate</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>📊 Support Stats</h3></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:.85rem;background:var(--gray-100);border-radius:10px;">
+              <span style="font-size:.83rem;font-weight:600;color:var(--gray-700);">Issues Today</span>
+              <span style="font-size:1.2rem;font-weight:800;color:var(--gray-900);">3</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:.85rem;background:#f0fdf4;border-radius:10px;">
+              <span style="font-size:.83rem;font-weight:600;color:var(--gray-700);">Resolved Today</span>
+              <span style="font-size:1.2rem;font-weight:800;color:var(--green);">8</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:.85rem;background:var(--teal-l);border-radius:10px;">
+              <span style="font-size:.83rem;font-weight:600;color:var(--gray-700);">Avg Response Time</span>
+              <span style="font-size:1.2rem;font-weight:800;color:var(--teal);">12 min</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:.85rem;background:#fffbeb;border-radius:10px;">
+              <span style="font-size:.83rem;font-weight:600;color:var(--gray-700);">Customer Satisfaction</span>
+              <span style="font-size:1.2rem;font-weight:800;color:var(--yellow);">4.8 ⭐</span>
+            </div>
+            <a href="https://wa.me/919106666146" target="_blank" class="btn btn-teal btn-full" style="text-decoration:none;margin-top:.25rem;">💬 Open WhatsApp Support</a>
+          </div>
+        </div>
+      </div>
+    </div><!-- /support -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ════ STATUS UPDATE MODAL ════ -->
+<div class="modal-overlay" id="statusModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>📝 Update Order Status</h3>
+      <button class="modal-close" onclick="closeModal('statusModal')">✕</button>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <div style="font-size:.82rem;color:var(--gray-500);margin-bottom:.85rem;">Order: <strong id="modalOrderId"></strong> — <strong id="modalCustomer"></strong></div>
+      <div class="fg" style="margin-bottom:.9rem;">
+        <label>New Status</label>
+        <select id="newStatus">
+          <option value="">Select status…</option>
+          <option value="picked">Picked Up</option>
+          <option value="cleaning">In Cleaning</option>
+          <option value="packed">Packed &amp; Ready</option>
+          <option value="delivery">Out for Delivery</option>
+          <option value="delivered">Delivered</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Notes (optional)</label>
+        <textarea placeholder="Add any notes about this update…" rows="3" style="resize:none;"></textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:.75rem;">
+      <button class="btn btn-out" style="flex:1;justify-content:center;padding:.75rem;" onclick="closeModal('statusModal')">Cancel</button>
+      <button class="btn btn-teal" style="flex:1;justify-content:center;padding:.75rem;" onclick="saveStatus()">✅ Save Update</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ ASSIGN STAFF MODAL ════ -->
+<div class="modal-overlay" id="assignModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>🚴 Assign Delivery Staff</h3>
+      <button class="modal-close" onclick="closeModal('assignModal')">✕</button>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <div style="font-size:.82rem;color:var(--gray-500);margin-bottom:.85rem;">Assigning staff for: <strong id="assignOrderId"></strong> — <strong id="assignCustomer"></strong></div>
+      <div class="fg">
+        <label>Select Staff Member</label>
+        <select id="staffSelect">
+          <option value="">Choose staff…</option>
+          <option value="ravi">Ravi Kumar (3 active jobs)</option>
+          <option value="suresh">Suresh Patel (2 active jobs)</option>
+          <option value="mohan">Mohan Singh ✅ Available (0 jobs)</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:.75rem;margin-top:1rem;">
+      <button class="btn btn-out" style="flex:1;justify-content:center;padding:.75rem;" onclick="closeModal('assignModal')">Cancel</button>
+      <button class="btn btn-teal" style="flex:1;justify-content:center;padding:.75rem;" onclick="confirmAssign()">✅ Confirm Assignment</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── Init ─────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', function() {
+  var user = ShonaAuth.guard('manager');
+  if (!user) return;
+  var nameEl = document.getElementById('mgrName');
+  var avEl   = document.getElementById('mgrAv');
+  if (nameEl) nameEl.textContent = user.name;
+  if (avEl)   avEl.textContent   = user.name.charAt(0).toUpperCase();
+});
+
+/* ── Page Navigation ─────────────────────── */
+var PAGE_NAMES = {
+  overview:'Overview', pickups:"Today's Pickups", transit:'In Transit',
+  completed:'Completed', customers:'Customers', invoices:'Invoices',
+  inventory:'Inventory', staff:'Delivery Staff', support:'Support'
+};
+
+function goPage(pageId, navEl) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  var target = document.getElementById('page-' + pageId);
+  if (target) target.classList.add('active');
+
+  document.querySelectorAll('.sb-item').forEach(function(i){ i.classList.remove('active'); });
+  if (navEl) navEl.classList.add('active');
+
+  var pn = document.getElementById('pageName');
+  if (pn) pn.textContent = PAGE_NAMES[pageId] || pageId;
+
+  window.scrollTo({ top:0, behavior:'smooth' });
+  closeMobileSidebar();
+}
+
+/* ── Mobile Sidebar ──────────────────────── */
+var sidebar = document.getElementById('sidebar');
+document.getElementById('menuToggle').addEventListener('click', function() {
+  sidebar.classList.toggle('open');
+});
+sidebar.addEventListener('click', function(e) {
+  if (e.target === sidebar) closeMobileSidebar();
+});
+function closeMobileSidebar() {
+  sidebar.classList.remove('open');
+}
+
+/* ── Pickup Filter ───────────────────────── */
+function filterPickups(filter) {
+  document.querySelectorAll('#pickupsTable tr').forEach(function(row) {
+    var status = row.dataset.status || '';
+    row.style.display = (filter === 'all' || status === filter) ? '' : 'none';
+  });
+}
+
+/* ── Customer Search ─────────────────────── */
+function searchCustomers(val) {
+  val = val.toLowerCase();
+  document.querySelectorAll('#customersTable tr').forEach(function(row) {
+    row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+  });
+}
+
+/* ── Status Modal ────────────────────────── */
+function openStatusModal(orderId, customer) {
+  document.getElementById('modalOrderId').textContent  = orderId;
+  document.getElementById('modalCustomer').textContent = customer;
+  document.getElementById('newStatus').value = '';
+  openModal('statusModal');
+}
+function saveStatus() {
+  var status = document.getElementById('newStatus').value;
+  if (!status) { showToast('⚠️ Please select a status'); return; }
+  var labels = { picked:'Picked Up', cleaning:'In Cleaning', packed:'Packed & Ready', delivery:'Out for Delivery', delivered:'Delivered' };
+  showToast('✅ Status updated to: ' + (labels[status] || status));
+  closeModal('statusModal');
+}
+
+/* ── Assign Modal ────────────────────────── */
+function openAssignModal(orderId, customer) {
+  document.getElementById('assignOrderId').textContent  = orderId;
+  document.getElementById('assignCustomer').textContent = customer;
+  document.getElementById('staffSelect').value = '';
+  openModal('assignModal');
+}
+function confirmAssign() {
+  var staff = document.getElementById('staffSelect').value;
+  if (!staff) { showToast('⚠️ Please select a staff member'); return; }
+  var names = { ravi:'Ravi Kumar', suresh:'Suresh Patel', mohan:'Mohan Singh' };
+  showToast('✅ Assigned to ' + (names[staff] || staff));
+  closeModal('assignModal');
+}
+
+/* ── Modal helpers ───────────────────────── */
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+// Close on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) closeModal(overlay.id);
+  });
+});
+
+/* ── Add Task ────────────────────────────── */
+function addTask() {
+  var txt = prompt('Enter new task:');
+  if (!txt || !txt.trim()) return;
+  var list = document.getElementById('taskList');
+  var item = document.createElement('div');
+  item.className = 'task-item';
+  item.innerHTML =
+    '<input type="checkbox" class="task-checkbox" onchange="this.nextElementSibling.style.textDecoration=this.checked?\'line-through\':\'none\';this.nextElementSibling.style.color=this.checked?\'var(--gray-500)\':\'\'">' +
+    '<div class="tdot td-b"></div>' +
+    '<span class="t-txt">' + txt.trim() + '</span>' +
+    '<span class="t-time">New</span>';
+  list.appendChild(item);
+  showToast('✅ Task added!');
+}
+
+/* ── Logout ──────────────────────────────── */
+function doLogout() {
+  if (confirm('Are you sure you want to logout?')) {
+    ShonaAuth.logout();
+    window.location.href = '../index.html';
+  }
+}
+
+/* ── Toast ───────────────────────────────── */
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+</script>
+</body>
+</html>

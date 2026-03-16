@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Register – Shona Laundry</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --blue:#2563eb; --blue-d:#1d4ed8; --blue-l:#eff6ff;
+      --green:#16a34a; --red:#dc2626;
+      --gray-900:#0f172a; --gray-700:#334155; --gray-500:#64748b;
+      --gray-200:#e2e8f0; --gray-100:#f1f5f9; --white:#fff;
+      --font:'Poppins',sans-serif;
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+    body {
+      font-family:var(--font);
+      min-height:100vh;
+      min-height:100dvh; /* dynamic viewport for mobile */
+      background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 55%,#1d4ed8 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:1rem;
+      padding-bottom:calc(1rem + env(safe-area-inset-bottom));
+      position:relative;
+      overflow-x:hidden;
+    }
+
+    /* Background shapes */
+    .bg-s { position:fixed; border-radius:50%; pointer-events:none; z-index:0; }
+    .s1 { width:500px;height:500px;top:-150px;right:-150px;background:radial-gradient(circle,rgba(96,165,250,.12),transparent 70%); }
+    .s2 { width:350px;height:350px;bottom:-100px;left:-80px;background:radial-gradient(circle,rgba(37,211,102,.08),transparent 70%); }
+
+    /* ── WRAPPER ── */
+    .wrap {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      max-width:900px;
+      width:100%;
+      background:var(--white);
+      border-radius:24px;
+      overflow:hidden;
+      box-shadow:0 32px 80px rgba(0,0,0,.45);
+      position:relative;
+      z-index:1;
+    }
+
+    /* ── LEFT PANEL ── */
+    .left {
+      background:linear-gradient(160deg,#0f172a,#1e3a5f,#1d4ed8);
+      padding:2.5rem 2rem;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:#fff;
+    }
+    .left img {
+      height:120px;
+      width:auto;
+      object-fit:contain;
+      background:rgba(255,255,255,.1);
+      border-radius:16px;
+      padding:10px;
+      margin-bottom:1.25rem;
+    }
+    .left h2 { font-size:1.35rem;font-weight:800;margin-bottom:.35rem; }
+    .left p  { font-size:.8rem;opacity:.7;line-height:1.7;max-width:210px;margin-bottom:1.35rem; }
+    .left-steps { width:100%;display:flex;flex-direction:column;gap:.5rem;text-align:left; }
+    .ls {
+      display:flex;align-items:center;gap:.65rem;
+      background:rgba(255,255,255,.07);border-radius:9px;
+      padding:.55rem .8rem;font-size:.76rem;
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .ls-num {
+      width:20px;height:20px;border-radius:50%;
+      background:rgba(255,255,255,.2);
+      display:flex;align-items:center;justify-content:center;
+      font-size:.7rem;font-weight:700;flex-shrink:0;
+    }
+
+    /* ── RIGHT PANEL ── */
+    .right {
+      padding:2rem 2rem;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      overflow-y:auto;
+      max-height:100vh;
+      max-height:100dvh;
+    }
+    .right h3 { font-size:1.25rem;font-weight:800;color:var(--gray-900);margin-bottom:.18rem; }
+    .right .sub { font-size:.8rem;color:var(--gray-500);margin-bottom:1.25rem; }
+
+    /* ── ALERTS ── */
+    .alert {
+      display:none;align-items:center;gap:.5rem;
+      padding:.6rem .85rem;border-radius:9px;
+      font-size:.78rem;margin-bottom:.85rem;line-height:1.45;
+    }
+    .alert.show { display:flex; }
+    .alert-err { background:#fef2f2;border:1px solid #fca5a5;color:var(--red); }
+    .alert-ok  { background:#f0fdf4;border:1px solid #86efac;color:var(--green); }
+
+    /* ── FORM GRID ── */
+    .form-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:.75rem;
+    }
+    .fg { display:flex;flex-direction:column;gap:.26rem; }
+    .fg.full { grid-column:1/-1; }
+    .fg label { font-size:.74rem;font-weight:600;color:var(--gray-700); }
+
+    .ibox { position:relative; }
+    .iico {
+      position:absolute;left:.78rem;top:50%;
+      transform:translateY(-50%);
+      pointer-events:none;font-size:.88rem;
+    }
+    .fg input {
+      width:100%;
+      padding:.68rem .78rem .68rem 2.15rem;
+      border:1.5px solid var(--gray-200);
+      border-radius:9px;
+      font-size:.84rem;
+      font-family:var(--font);
+      color:var(--gray-900);
+      background:var(--gray-100);
+      outline:none;
+      transition:.2s;
+      -webkit-appearance:none;
+      appearance:none;
+    }
+    .fg input:focus {
+      border-color:var(--blue);
+      background:var(--white);
+      box-shadow:0 0 0 3px rgba(37,99,235,.1);
+    }
+    .fg input.err { border-color:var(--red);background:#fff5f5; }
+    .ferr { font-size:.7rem;color:var(--red);margin-top:.2rem;display:none;line-height:1.4; }
+    .ferr.show { display:block; }
+
+    .eye-btn {
+      position:absolute;right:.78rem;top:50%;
+      transform:translateY(-50%);
+      background:none;border:none;cursor:pointer;
+      font-size:.82rem;color:var(--gray-500);
+      padding:.2rem;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    /* ── PASSWORD STRENGTH ── */
+    .pass-strength {
+      height:3px;border-radius:4px;
+      margin-top:.3rem;
+      background:var(--gray-200);overflow:hidden;
+    }
+    .ps-fill { height:100%;border-radius:4px;width:0;transition:.3s; }
+    .ps-label { font-size:.68rem;color:var(--gray-500);margin-top:.18rem; }
+
+    /* ── SUBMIT BUTTON ── */
+    .btn-submit {
+      width:100%;padding:.82rem;border:none;
+      border-radius:11px;
+      background:linear-gradient(135deg,var(--blue),var(--blue-d));
+      color:#fff;font-size:.9rem;font-weight:700;
+      font-family:var(--font);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:.5rem;
+      transition:.25s;margin-top:.9rem;
+      box-shadow:0 4px 16px rgba(37,99,235,.35);
+      -webkit-tap-highlight-color:transparent;
+    }
+    .btn-submit:hover:not(:disabled) {
+      transform:translateY(-2px);
+      box-shadow:0 8px 28px rgba(37,99,235,.45);
+    }
+    .btn-submit:active:not(:disabled) { transform:translateY(0); }
+    .btn-submit:disabled { opacity:.65;cursor:not-allowed; }
+
+    .spin {
+      width:15px;height:15px;
+      border:2px solid rgba(255,255,255,.35);
+      border-top-color:#fff;border-radius:50%;
+      animation:sp .65s linear infinite;
+      display:none;flex-shrink:0;
+    }
+    @keyframes sp { to { transform:rotate(360deg); } }
+
+    /* ── FOOTER TEXT ── */
+    .footer-txt {
+      text-align:center;margin-top:1rem;
+      font-size:.77rem;color:var(--gray-500);
+      line-height:1.8;
+    }
+    .footer-txt a { color:var(--blue);font-weight:600;text-decoration:none; }
+    .footer-txt a:hover { text-decoration:underline; }
+
+    /* ══════════════════════════════════════
+       RESPONSIVE — TABLET (≤ 768px)
+    ══════════════════════════════════════ */
+    @media (max-width:768px) {
+      body { padding:.75rem; align-items:flex-start; padding-top:1.25rem; }
+
+      .wrap {
+        grid-template-columns:1fr;
+        border-radius:20px;
+        max-width:480px;
+        margin:0 auto;
+      }
+
+      /* Hide left panel on tablet/mobile */
+      .left { display:none; }
+
+      .right {
+        padding:1.75rem 1.5rem;
+        max-height:none;
+        overflow-y:visible;
+      }
+
+      .right h3 { font-size:1.2rem; }
+
+      /* Show a mini header with logo on mobile instead */
+      .mobile-header {
+        display:flex !important;
+        align-items:center;
+        gap:.75rem;
+        margin-bottom:1.25rem;
+        padding-bottom:1rem;
+        border-bottom:1px solid var(--gray-100);
+      }
+      .mobile-header img {
+        height:42px;width:auto;
+        object-fit:contain;border-radius:8px;
+      }
+      .mobile-header-text h4 { font-size:.92rem;font-weight:800;color:var(--gray-900); }
+      .mobile-header-text p  { font-size:.72rem;color:var(--gray-500); }
+
+      .form-grid { gap:.65rem; }
+      .fg input  { font-size:.84rem;padding:.65rem .78rem .65rem 2.1rem; }
+    }
+
+    /* ══════════════════════════════════════
+       RESPONSIVE — MOBILE (≤ 480px)
+    ══════════════════════════════════════ */
+    @media (max-width:480px) {
+      body { padding:.6rem; padding-top:1rem; }
+
+      .wrap { border-radius:16px; }
+
+      .right { padding:1.4rem 1.1rem; }
+
+      /* Stack form to single column on small phones */
+      .form-grid { grid-template-columns:1fr; }
+      .fg.full   { grid-column:1; }
+
+      .right h3  { font-size:1.1rem; }
+      .right .sub{ font-size:.76rem; }
+
+      .fg input  { font-size:.82rem; padding:.62rem .75rem .62rem 2rem; }
+      .fg label  { font-size:.72rem; }
+      .btn-submit{ font-size:.86rem;padding:.78rem; }
+    }
+
+    /* ══════════════════════════════════════
+       RESPONSIVE — VERY SMALL (≤ 360px)
+    ══════════════════════════════════════ */
+    @media (max-width:360px) {
+      body { padding:.5rem; }
+      .right { padding:1.2rem .9rem; }
+      .right h3 { font-size:1rem; }
+      .fg input { font-size:.8rem;padding:.58rem .7rem .58rem 1.9rem; }
+      .iico { font-size:.8rem;left:.7rem; }
+      .btn-submit { font-size:.82rem;padding:.72rem; }
+    }
+
+    /* ══════════════════════════════════════
+       LANDSCAPE MOBILE
+    ══════════════════════════════════════ */
+    @media (max-height:500px) and (orientation:landscape) {
+      body { padding:.5rem;align-items:flex-start; }
+      .wrap { border-radius:14px; }
+      .right { padding:1rem 1.25rem; }
+      .right h3 { font-size:1rem;margin-bottom:.1rem; }
+      .right .sub { margin-bottom:.75rem; }
+      .form-grid { gap:.5rem; }
+      .btn-submit { padding:.68rem;margin-top:.6rem; }
+      .footer-txt { margin-top:.6rem;font-size:.72rem; }
+    }
+
+    /* ── Mobile header hidden on desktop ── */
+    .mobile-header { display:none; }
+  </style>
+</head>
+<body>
+<div class="bg-s s1"></div>
+<div class="bg-s s2"></div>
+
+<div class="wrap">
+
+  <!-- ── LEFT PANEL (desktop only) ── -->
+  <div class="left">
+    <img src="logo.jpeg" alt="Shona Laundry"
+      style="width:120px;height:120px;object-fit:contain;background:#fff;border-radius:18px;padding:10px;margin-bottom:1rem;box-shadow:0 4px 20px rgba(0,0,0,.25);"
+      onerror="this.style.display='none'"/>
+    <h2>Join Shona Laundry</h2>
+    <p>Create your account and start booking professional laundry service in Ujjain.</p>
+    <div class="left-steps">
+      <div class="ls"><div class="ls-num">1</div><span>Create your account</span></div>
+      <div class="ls"><div class="ls-num">2</div><span>Login with your credentials</span></div>
+      <div class="ls"><div class="ls-num">3</div><span>Book your first pickup</span></div>
+      <div class="ls"><div class="ls-num">4</div><span>Track your order in real-time</span></div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div class="right">
+
+    <!-- Mobile logo header (hidden on desktop) -->
+    <div class="mobile-header">
+      <div style="width:40px;height:40px;border-radius:9px;background:#eff6ff;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1.5px solid #dbeafe;">
+        <img src="logo.jpeg" alt="Shona Laundry" style="width:36px;height:36px;object-fit:contain;" onerror="this.style.display='none'"/>
+      </div>
+      <div class="mobile-header-text">
+        <h4>Shona Laundry</h4>
+        <p>Clean. Fluent. Professional.</p>
+      </div>
+    </div>
+
+    <h3>Create Account</h3>
+    <div class="sub">Join thousands of happy customers in Ujjain 🫧</div>
+
+    <!-- Alerts -->
+    <div class="alert alert-err" id="alertErr">❌ <span id="errTxt"></span></div>
+    <div class="alert alert-ok"  id="alertOk">✅ <span id="okTxt"></span></div>
+
+    <form id="regForm" novalidate>
+      <div class="form-grid">
+
+        <!-- Full Name -->
+        <div class="fg full">
+          <label>Full Name *</label>
+          <div class="ibox">
+            <span class="iico">👤</span>
+            <input type="text" id="rName" placeholder="Your full name"
+              autocomplete="name" inputmode="text"/>
+          </div>
+          <div class="ferr" id="errName">Please enter your full name (min 2 characters).</div>
+        </div>
+
+        <!-- Email -->
+        <div class="fg">
+          <label>Email Address *</label>
+          <div class="ibox">
+            <span class="iico">📧</span>
+            <input type="email" id="rEmail" placeholder="email@example.com"
+              autocomplete="email" inputmode="email"/>
+          </div>
+          <div class="ferr" id="errEmail">Enter a valid email address.</div>
+        </div>
+
+        <!-- Phone -->
+        <div class="fg">
+          <label>Phone Number *</label>
+          <div class="ibox">
+            <span class="iico">📱</span>
+            <input type="tel" id="rPhone" placeholder="9XXXXXXXXX"
+              autocomplete="tel" inputmode="tel" maxlength="10"/>
+          </div>
+          <div class="ferr" id="errPhone">Enter a valid 10-digit Indian phone number.</div>
+        </div>
+
+        <!-- Address -->
+        <div class="fg full">
+          <label>Home Address <span style="font-weight:400;color:var(--gray-500);">(optional)</span></label>
+          <div class="ibox">
+            <span class="iico">📍</span>
+            <input type="text" id="rAddress" placeholder="House no, street, area, Ujjain"
+              autocomplete="street-address"/>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="fg">
+          <label>Password *</label>
+          <div class="ibox">
+            <span class="iico">🔒</span>
+            <input type="password" id="rPass" placeholder="Min 6 characters"
+              autocomplete="new-password" oninput="checkStrength(this.value)"/>
+            <button type="button" class="eye-btn" id="eye1"
+              onclick="toggleEye('rPass','eye1')" aria-label="Show password">👁️</button>
+          </div>
+          <div class="pass-strength"><div class="ps-fill" id="psFill"></div></div>
+          <div class="ps-label" id="psLabel"></div>
+          <div class="ferr" id="errPass">Password must be at least 6 characters.</div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="fg">
+          <label>Confirm Password *</label>
+          <div class="ibox">
+            <span class="iico">🔒</span>
+            <input type="password" id="rPass2" placeholder="Repeat password"
+              autocomplete="new-password"/>
+            <button type="button" class="eye-btn" id="eye2"
+              onclick="toggleEye('rPass2','eye2')" aria-label="Show password">👁️</button>
+          </div>
+          <div class="ferr" id="errPass2">Passwords do not match.</div>
+        </div>
+
+      </div><!-- /form-grid -->
+
+      <button type="submit" class="btn-submit" id="regBtn">
+        <div class="spin" id="regSpin"></div>
+        <span id="regBtnTxt">Create Account</span>
+      </button>
+    </form>
+
+    <div class="footer-txt">
+      Already have an account? <a href="login.html">Sign In</a>
+      &nbsp;|&nbsp; <a href="index.html">← Back to Website</a>
+    </div>
+
+  </div><!-- /right -->
+</div><!-- /wrap -->
+
+<script>
+  const API = 'http://localhost:3001/api';
+
+  /* ── Password strength ── */
+  function checkStrength(val) {
+    const fill  = document.getElementById('psFill');
+    const label = document.getElementById('psLabel');
+    let score = 0;
+    if (val.length >= 6)           score++;
+    if (val.length >= 10)          score++;
+    if (/[A-Z]/.test(val))         score++;
+    if (/[0-9]/.test(val))         score++;
+    if (/[^A-Za-z0-9]/.test(val))  score++;
+    const colors = ['','#ef4444','#f59e0b','#f59e0b','#22c55e','#16a34a'];
+    const widths  = ['0%','20%','40%','60%','80%','100%'];
+    const labels  = ['','Weak','Fair','Fair','Strong','Very Strong'];
+    fill.style.width      = widths[score];
+    fill.style.background = colors[score];
+    label.textContent     = val.length > 0 ? labels[score] : '';
+    label.style.color     = colors[score];
+  }
+
+  /* ── Toggle password visibility ── */
+  function toggleEye(inputId, btnId) {
+    const inp = document.getElementById(inputId);
+    const btn = document.getElementById(btnId);
+    inp.type        = inp.type === 'password' ? 'text' : 'password';
+    btn.textContent = inp.type === 'password' ? '👁️' : '🙈';
+  }
+
+  /* ── Clear errors on input ── */
+  document.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      inp.classList.remove('err');
+      // Map input ID to error element
+      const map = { rName:'errName', rEmail:'errEmail', rPhone:'errPhone', rPass:'errPass', rPass2:'errPass2' };
+      const errId = map[inp.id];
+      if (errId) document.getElementById(errId).classList.remove('show');
+      document.getElementById('alertErr').classList.remove('show');
+    });
+  });
+
+  /* ── Form submit ── */
+  document.getElementById('regForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name  = document.getElementById('rName').value.trim();
+    const email = document.getElementById('rEmail').value.trim();
+    const phone = document.getElementById('rPhone').value.trim().replace(/[\s+\-()]/g, '');
+    const addr  = document.getElementById('rAddress').value.trim();
+    const pass  = document.getElementById('rPass').value;
+    const pass2 = document.getElementById('rPass2').value;
+
+    // Clear alerts
+    document.getElementById('alertErr').classList.remove('show');
+    document.getElementById('alertOk').classList.remove('show');
+
+    // Validate
+    let valid = true;
+    function showErr(id, msg) {
+      const inp = document.getElementById('r' + id);
+      const err = document.getElementById('err' + id);
+      if (inp) inp.classList.add('err');
+      if (err) { err.textContent = msg; err.classList.add('show'); }
+      valid = false;
+    }
+
+    if (!name  || name.length < 2)                               showErr('Name',  'Please enter your full name (min 2 characters).');
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))     showErr('Email', 'Enter a valid email address.');
+    if (!phone || !/^[6-9]\d{9}$/.test(phone))                   showErr('Phone', 'Enter a valid 10-digit Indian phone number (starts with 6-9).');
+    if (!pass  || pass.length < 6)                               showErr('Pass',  'Password must be at least 6 characters.');
+    if (pass && pass2 && pass !== pass2)                         showErr('Pass2', 'Passwords do not match.');
+    if (!valid) return;
+
+    // Show loading
+    const spin   = document.getElementById('regSpin');
+    const btnTxt = document.getElementById('regBtnTxt');
+    const btn    = document.getElementById('regBtn');
+    spin.style.display = 'block';
+    btnTxt.textContent = 'Creating account…';
+    btn.disabled       = true;
+
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 8000);
+
+      const res  = await fetch(API + '/auth/register', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ name, email, phone, password: pass, address: addr }),
+        signal:  controller.signal,
+      });
+      clearTimeout(timer);
+      const data = await res.json();
+
+      spin.style.display = 'none';
+      btn.disabled       = false;
+      btnTxt.textContent = 'Create Account';
+
+      if (data.success) {
+        const okEl = document.getElementById('alertOk');
+        okEl.classList.add('show');
+        document.getElementById('okTxt').textContent = 'Account created successfully! Redirecting to login…';
+        btnTxt.textContent = '✅ Account Created!';
+        btn.style.background = 'linear-gradient(135deg,#16a34a,#22c55e)';
+
+        // Save email for auto-fill on login page
+        sessionStorage.setItem('reg_email', email);
+        setTimeout(() => { window.location.href = 'login.html'; }, 1800);
+
+      } else {
+        const errEl = document.getElementById('alertErr');
+        errEl.classList.add('show');
+        document.getElementById('errTxt').textContent = data.message || 'Registration failed. Please try again.';
+      }
+
+    } catch (err) {
+      spin.style.display = 'none';
+      btn.disabled       = false;
+      btnTxt.textContent = 'Create Account';
+      const errEl = document.getElementById('alertErr');
+      errEl.classList.add('show');
+      if (err.name === 'AbortError') {
+        document.getElementById('errTxt').textContent = 'Request timed out. Check your connection and make sure the server is running.';
+      } else {
+        document.getElementById('errTxt').textContent = 'Cannot connect to server. Please make sure the server is running (node server.js).';
+      }
+    }
+  });
+</script>
+</body>
+</html>

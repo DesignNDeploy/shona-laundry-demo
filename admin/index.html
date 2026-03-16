@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard – Shona Laundry</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="../auth.js"></script>
+  <style>
+    :root {
+      --blue:#2563eb; --blue-d:#1d4ed8; --blue-l:#eff6ff;
+      --green:#16a34a; --red:#dc2626; --yellow:#d97706;
+      --purple:#7c3aed; --teal:#0f766e;
+      --gray-900:#0f172a; --gray-700:#334155; --gray-500:#64748b;
+      --gray-200:#e2e8f0; --gray-100:#f1f5f9; --white:#fff;
+      --font:'Poppins',sans-serif; --sw:240px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font);background:var(--gray-100);color:var(--gray-700);display:flex;min-height:100vh;}
+
+    /* ── SIDEBAR ── */
+    .sidebar{width:var(--sw);background:linear-gradient(180deg,#0f172a,#1e3a5f);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;transition:.3s;}
+    .sb-logo{padding:1.2rem 1.3rem;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:.6rem;}
+    .sb-logo img{height:44px;width:auto;object-fit:contain;filter:brightness(0) invert(1);opacity:.92;}
+    .sb-logo-txt{font-size:1rem;font-weight:800;color:#fff;display:none;}
+    .sb-logo-txt span{color:#60a5fa;}
+    .sb-sec{padding:.55rem 1.25rem .2rem;font-size:.64rem;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.09em;margin-top:.5rem;}
+    .sb-item{display:flex;align-items:center;gap:.65rem;padding:.68rem 1.25rem;font-size:.84rem;font-weight:500;color:rgba(255,255,255,.68);cursor:pointer;transition:.18s;border-left:3px solid transparent;}
+    .sb-item:hover{background:rgba(255,255,255,.07);color:#fff;}
+    .sb-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#60a5fa;font-weight:600;}
+    .sb-item .ico{font-size:.95rem;width:18px;text-align:center;flex-shrink:0;}
+    .sb-item.logout-item{color:rgba(255,100,100,.8);margin-top:.3rem;}
+    .sb-item.logout-item:hover{background:rgba(220,38,38,.15);color:#fca5a5;}
+    .sb-foot{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,.08);font-size:.72rem;color:rgba(255,255,255,.35);margin-top:auto;}
+
+    /* ── MAIN ── */
+    .main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+
+    /* ── TOPBAR ── */
+    .topbar{background:var(--white);border-bottom:1px solid var(--gray-200);padding:.85rem 1.75rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 6px rgba(0,0,0,.06);}
+    .tb-left{display:flex;align-items:center;gap:.85rem;}
+    .tb-title{font-size:1rem;font-weight:700;color:var(--gray-900);}
+    .tb-page{font-size:.79rem;color:var(--gray-500);font-weight:500;}
+    .tb-right{display:flex;align-items:center;gap:.8rem;}
+    .tb-pill{background:var(--blue-l);color:var(--blue);padding:.25rem .8rem;border-radius:100px;font-size:.75rem;font-weight:600;}
+    .tb-live{background:#dcfce7;color:var(--green);padding:.25rem .75rem;border-radius:100px;font-size:.73rem;font-weight:600;}
+    .tb-name{font-size:.83rem;font-weight:600;color:var(--gray-700);}
+    .tb-av{width:36px;height:36px;background:linear-gradient(135deg,var(--blue),var(--blue-d));border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.88rem;flex-shrink:0;}
+    .btn-logout{background:#fee2e2;color:var(--red);border:none;border-radius:8px;padding:.3rem .85rem;font-size:.75rem;font-weight:600;cursor:pointer;font-family:var(--font);transition:.2s;}
+    .btn-logout:hover{background:#fecaca;}
+    .menu-toggle{display:none;background:var(--gray-100);border:1.5px solid var(--gray-200);color:var(--gray-700);width:36px;height:36px;border-radius:8px;font-size:1.1rem;cursor:pointer;align-items:center;justify-content:center;}
+
+    /* ── CONTENT ── */
+    .content{padding:1.75rem;flex:1;}
+
+    /* ── PAGES ── */
+    .page{display:none;flex-direction:column;gap:1.25rem;animation:fadeIn .25s ease;}
+    .page.active{display:flex;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ── STATS ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.1rem;}
+    .stat-card{background:var(--white);border-radius:14px;padding:1.35rem;border:1.5px solid var(--gray-200);transition:.2s;}
+    .stat-card:hover{box-shadow:0 6px 24px rgba(37,99,235,.1);transform:translateY(-2px);}
+    .stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;}
+    .stat-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;}
+    .si-blue{background:#dbeafe;} .si-green{background:#dcfce7;} .si-yellow{background:#fef9c3;}
+    .si-purple{background:#ede9fe;} .si-teal{background:#ccfbf1;} .si-red{background:#fee2e2;}
+    .stat-badge{font-size:.7rem;font-weight:600;padding:.18rem .52rem;border-radius:100px;}
+    .sb-up{background:#dcfce7;color:var(--green);} .sb-dn{background:#fee2e2;color:var(--red);}
+    .stat-val{font-size:1.85rem;font-weight:800;color:var(--gray-900);margin-bottom:.18rem;}
+    .stat-lbl{font-size:.78rem;color:var(--gray-500);}
+
+    /* ── BUTTONS ── */
+    .btn{display:inline-flex;align-items:center;gap:.35rem;padding:.45rem 1rem;border-radius:100px;font-size:.78rem;font-weight:600;cursor:pointer;border:none;font-family:var(--font);transition:.2s;}
+    .btn-blue{background:var(--blue);color:#fff;} .btn-blue:hover{background:var(--blue-d);}
+    .btn-green{background:var(--green);color:#fff;} .btn-green:hover{opacity:.9;}
+    .btn-red{background:var(--red);color:#fff;} .btn-red:hover{opacity:.9;}
+    .btn-out{border:1.5px solid var(--gray-200);color:var(--gray-700);background:var(--white);} .btn-out:hover{border-color:var(--blue);color:var(--blue);}
+    .btn-sm{padding:.28rem .7rem;font-size:.73rem;border-radius:7px;}
+    .btn-edit{background:#dbeafe;color:var(--blue);border:none;cursor:pointer;font-family:var(--font);padding:.28rem .7rem;border-radius:7px;font-size:.73rem;font-weight:600;}
+    .btn-del{background:#fee2e2;color:var(--red);border:none;cursor:pointer;font-family:var(--font);padding:.28rem .7rem;border-radius:7px;font-size:.73rem;font-weight:600;}
+    .btn-full{width:100%;justify-content:center;padding:.8rem;border-radius:10px;font-size:.88rem;}
+
+    /* ── SECTION BAR ── */
+    .sec-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.9rem;}
+    .sec-bar h3{font-size:.95rem;font-weight:700;color:var(--gray-900);}
+
+    /* ── TABLE ── */
+    .table-card{background:var(--white);border-radius:14px;border:1.5px solid var(--gray-200);overflow:hidden;}
+    .table-scroll{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    thead{background:var(--gray-100);}
+    th{padding:.72rem 1rem;text-align:left;font-size:.73rem;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+    td{padding:.82rem 1rem;font-size:.84rem;color:var(--gray-700);border-bottom:1px solid var(--gray-100);}
+    tr:last-child td{border:none;}
+    tr:hover td{background:#f8fafc;}
+
+    /* ── BADGE ── */
+    .badge{display:inline-block;padding:.2rem .65rem;border-radius:100px;font-size:.71rem;font-weight:600;}
+    .b-p{background:#fef9c3;color:var(--yellow);}
+    .b-pr{background:#dbeafe;color:var(--blue);}
+    .b-d{background:#dcfce7;color:var(--green);}
+    .b-r{background:#fee2e2;color:var(--red);}
+    .b-t{background:#ccfbf1;color:var(--teal);}
+    .b-new{background:#ede9fe;color:var(--purple);}
+
+    /* ── CARD ── */
+    .card{background:var(--white);border-radius:14px;border:1.5px solid var(--gray-200);overflow:hidden;}
+    .card-head{padding:.9rem 1.35rem;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;}
+    .card-head h3{font-size:.93rem;font-weight:700;color:var(--gray-900);}
+    .card-body{padding:1.35rem;}
+
+    /* ── CHARTS ── */
+    .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;}
+    .chart-box{background:var(--white);border-radius:14px;border:1.5px solid var(--gray-200);padding:1.35rem;}
+    .chart-box h4{font-size:.9rem;font-weight:700;color:var(--gray-900);margin-bottom:1rem;}
+    .bars{display:flex;align-items:flex-end;gap:.5rem;height:130px;}
+    .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem;}
+    .bar{width:100%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--blue),#60a5fa);transition:.4s;}
+    .bar-lbl{font-size:.62rem;color:var(--gray-500);}
+    .progress-list{display:flex;flex-direction:column;gap:.75rem;}
+    .pi-top{display:flex;justify-content:space-between;font-size:.79rem;margin-bottom:.3rem;}
+    .pi-bar{height:7px;background:var(--gray-100);border-radius:4px;overflow:hidden;}
+    .pi-fill{height:100%;border-radius:4px;}
+
+    /* ── GRID 2 ── */
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;}
+
+    /* ── FORM ── */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .fg{display:flex;flex-direction:column;gap:.28rem;}
+    .fg label{font-size:.76rem;font-weight:600;color:var(--gray-700);}
+    .fg input,.fg select,.fg textarea{padding:.68rem .9rem;border:1.5px solid var(--gray-200);border-radius:9px;font-size:.84rem;font-family:var(--font);color:var(--gray-900);background:var(--gray-100);outline:none;transition:.2s;}
+    .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+    .fg-full{grid-column:1/-1;}
+
+    /* ── MODAL ── */
+    .modal-overlay{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.55);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:.25s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal{background:var(--white);border-radius:20px;padding:1.75rem;width:100%;max-width:460px;box-shadow:0 24px 80px rgba(0,0,0,.3);transform:scale(.95);transition:.25s;}
+    .modal-overlay.open .modal{transform:scale(1);}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;}
+    .modal-head h3{font-size:.97rem;font-weight:700;color:var(--gray-900);}
+    .modal-close{background:var(--gray-100);border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:.2s;}
+    .modal-close:hover{background:var(--gray-200);}
+    .modal-btns{display:flex;gap:.75rem;margin-top:1.25rem;}
+    .modal-btns button{flex:1;justify-content:center;padding:.78rem;}
+
+    /* ── SETTINGS ── */
+    .settings-section{background:var(--white);border-radius:14px;border:1.5px solid var(--gray-200);overflow:hidden;margin-bottom:1rem;}
+    .ss-head{padding:.9rem 1.3rem;border-bottom:1px solid var(--gray-100);font-size:.9rem;font-weight:700;color:var(--gray-900);}
+    .ss-body{padding:1.2rem 1.3rem;display:flex;flex-direction:column;gap:.85rem;}
+    .ss-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;}
+    .ss-label{font-size:.83rem;font-weight:600;color:var(--gray-700);}
+    .ss-val{font-size:.82rem;color:var(--gray-500);}
+    .toggle{position:relative;display:inline-block;width:42px;height:24px;}
+    .toggle input{opacity:0;width:0;height:0;}
+    .toggle-slider{position:absolute;inset:0;background:var(--gray-200);border-radius:24px;cursor:pointer;transition:.3s;}
+    .toggle-slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;}
+    .toggle input:checked + .toggle-slider{background:var(--blue);}
+    .toggle input:checked + .toggle-slider:before{transform:translateX(18px);}
+
+    /* ── TOAST ── */
+    .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--gray-900);color:#fff;padding:.7rem 1.4rem;border-radius:100px;font-size:.83rem;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:9999;opacity:0;transition:opacity .3s,transform .3s;white-space:nowrap;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+    /* ── FILTER ── */
+    .filter-sel{padding:.36rem .75rem;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.78rem;font-family:var(--font);color:var(--gray-700);outline:none;cursor:pointer;background:var(--white);}
+    input.search-input{padding:.38rem .85rem;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.8rem;font-family:var(--font);outline:none;width:200px;}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:960px){:root{--sw:200px;}}
+    @media(max-width:720px){
+      .sidebar{transform:translateX(-100%);z-index:200;}
+      .sidebar.open{transform:translateX(0);}
+      .main{margin-left:0;}
+      .menu-toggle{display:flex;}
+      .content{padding:1.1rem;}
+      .charts-grid,.grid-2{grid-template-columns:1fr;}
+      .stats-grid{grid-template-columns:1fr 1fr;}
+      .form-grid{grid-template-columns:1fr;}
+    }
+    @media(max-width:480px){.topbar{padding:.75rem 1rem;}.stats-grid{grid-template-columns:1fr 1fr;}}
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <img src="../logo.jpeg" alt="Shona Laundry"
+      onerror="this.style.display='none';document.querySelector('.sb-logo-txt').style.display='block'"/>
+    <span class="sb-logo-txt"><span>Shona</span>Laundry</span>
+  </div>
+  <nav>
+    <div class="sb-sec">Main</div>
+    <div class="sb-item active" data-page="dashboard"  onclick="goPage('dashboard',this)"><span class="ico">📊</span> Dashboard</div>
+    <div class="sb-item" data-page="bookings"           onclick="goPage('bookings',this)"><span class="ico">📋</span> All Bookings</div>
+    <div class="sb-item" data-page="customers"          onclick="goPage('customers',this)"><span class="ico">👥</span> Customers</div>
+    <div class="sb-item" data-page="members"            onclick="goPage('members',this)"><span class="ico">👑</span> Members</div>
+    <div class="sb-sec">Management</div>
+    <div class="sb-item" data-page="prices"             onclick="goPage('prices',this)"><span class="ico">💰</span> Price Management</div>
+    <div class="sb-item" data-page="invoices"           onclick="goPage('invoices',this)"><span class="ico">🧾</span> Invoices</div>
+    <div class="sb-item" data-page="services"           onclick="goPage('services',this)"><span class="ico">📦</span> Services</div>
+    <div class="sb-sec">Team</div>
+    <div class="sb-item" data-page="managers"           onclick="goPage('managers',this)"><span class="ico">👷</span> Manager Accounts</div>
+    <div class="sb-item" data-page="staff"              onclick="goPage('staff',this)"><span class="ico">🚗</span> Delivery Staff</div>
+    <div class="sb-sec">Reports</div>
+    <div class="sb-item" data-page="reports"            onclick="goPage('reports',this)"><span class="ico">📈</span> Revenue Reports</div>
+    <div class="sb-item" data-page="settings"           onclick="goPage('settings',this)"><span class="ico">⚙️</span> Settings</div>
+    <div class="sb-sec">Account</div>
+    <div class="sb-item logout-item" onclick="doLogout()"><span class="ico">🚪</span> Logout</div>
+  </nav>
+  <div class="sb-foot">Admin Panel v2.0</div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <div class="topbar">
+    <div class="tb-left">
+      <button class="menu-toggle" id="menuToggle">☰</button>
+      <div>
+        <div class="tb-title">Admin Dashboard</div>
+        <div class="tb-page" id="pageName">Dashboard</div>
+      </div>
+    </div>
+    <div class="tb-right">
+      <span class="tb-live">🟢 Live</span>
+      <span class="tb-pill">Admin</span>
+      <span class="tb-name" id="adminName">Admin Shona</span>
+      <div class="tb-av" id="adminAv">A</div>
+      <button class="btn-logout" onclick="doLogout()">🚪 Logout</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ════ PAGE: DASHBOARD ════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-ico si-blue">📋</div><span class="stat-badge sb-up">↑ 12%</span></div>
+          <div class="stat-val">128</div><div class="stat-lbl">Bookings This Month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-ico si-green">💰</div><span class="stat-badge sb-up">↑ 8%</span></div>
+          <div class="stat-val">₹48,320</div><div class="stat-lbl">Revenue This Month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-ico si-yellow">👥</div><span class="stat-badge sb-up">↑ 5%</span></div>
+          <div class="stat-val">342</div><div class="stat-lbl">Total Customers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-ico si-purple">👑</div><span class="stat-badge sb-up">↑ 3%</span></div>
+          <div class="stat-val">86</div><div class="stat-lbl">Active Members</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card">
+        <div class="card-head"><h3>⚡ Quick Actions</h3></div>
+        <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.85rem;">
+          <button class="btn btn-blue btn-full" onclick="goPage('bookings',document.querySelector('[data-page=bookings]'))">📋 All Bookings</button>
+          <button class="btn btn-out btn-full"  onclick="goPage('managers',document.querySelector('[data-page=managers]'))">👷 Add Manager</button>
+          <button class="btn btn-out btn-full"  onclick="goPage('prices',document.querySelector('[data-page=prices]'))">💰 Edit Prices</button>
+          <button class="btn btn-out btn-full"  onclick="goPage('reports',document.querySelector('[data-page=reports]'))">📈 View Reports</button>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid">
+        <div class="chart-box">
+          <h4>📈 Monthly Revenue (₹)</h4>
+          <div class="bars">
+            <div class="bar-col"><div class="bar" style="height:60%"></div><span class="bar-lbl">Sep</span></div>
+            <div class="bar-col"><div class="bar" style="height:70%"></div><span class="bar-lbl">Oct</span></div>
+            <div class="bar-col"><div class="bar" style="height:55%"></div><span class="bar-lbl">Nov</span></div>
+            <div class="bar-col"><div class="bar" style="height:82%"></div><span class="bar-lbl">Dec</span></div>
+            <div class="bar-col"><div class="bar" style="height:76%"></div><span class="bar-lbl">Jan</span></div>
+            <div class="bar-col"><div class="bar" style="height:91%"></div><span class="bar-lbl">Feb</span></div>
+            <div class="bar-col"><div class="bar" style="height:100%;background:linear-gradient(180deg,#16a34a,#22c55e)"></div><span class="bar-lbl">Mar</span></div>
+          </div>
+        </div>
+        <div class="chart-box">
+          <h4>🧺 Bookings by Category</h4>
+          <div class="progress-list">
+            <div><div class="pi-top"><span>🏠 Home Laundry</span><strong>45%</strong></div><div class="pi-bar"><div class="pi-fill" style="width:45%;background:#2563eb;"></div></div></div>
+            <div><div class="pi-top"><span>🍽️ Restaurant</span><strong>25%</strong></div><div class="pi-bar"><div class="pi-fill" style="width:25%;background:#0ea5e9;"></div></div></div>
+            <div><div class="pi-top"><span>💆 Salon &amp; Spa</span><strong>18%</strong></div><div class="pi-bar"><div class="pi-fill" style="width:18%;background:#8b5cf6;"></div></div></div>
+            <div><div class="pi-top"><span>🏥 Hospital</span><strong>12%</strong></div><div class="pi-bar"><div class="pi-fill" style="width:12%;background:#10b981;"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Bookings -->
+      <div class="sec-bar">
+        <h3>📋 Recent Bookings</h3>
+        <button class="btn btn-blue btn-sm" onclick="goPage('bookings',document.querySelector('[data-page=bookings]'))">View All →</button>
+      </div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>#ID</th><th>Customer</th><th>Service</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>#B001</td><td>Priya Sharma</td><td>Home Laundry</td><td>13 Mar 2026</td><td>₹480</td><td><span class="badge b-d">Delivered</span></td></tr>
+              <tr><td>#B002</td><td>Hotel Amber</td><td>Restaurant</td><td>13 Mar 2026</td><td>₹1,200</td><td><span class="badge b-pr">In Progress</span></td></tr>
+              <tr><td>#B003</td><td>Glow Salon</td><td>Salon &amp; Spa</td><td>14 Mar 2026</td><td>₹360</td><td><span class="badge b-p">Pending</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: ALL BOOKINGS ════ -->
+    <div class="page" id="page-bookings">
+      <div class="sec-bar">
+        <h3>📋 All Bookings</h3>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <select class="filter-sel" onchange="filterBookings(this.value)">
+            <option value="all">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="progress">In Progress</option>
+            <option value="delivered">Delivered</option>
+          </select>
+          <select class="filter-sel">
+            <option>All Services</option>
+            <option>Home Laundry</option>
+            <option>Restaurant</option>
+            <option>Salon &amp; Spa</option>
+            <option>Hospital</option>
+            <option>Express</option>
+          </select>
+          <button class="btn btn-blue btn-sm" onclick="openModal('addBookingModal')">+ New Booking</button>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>#ID</th><th>Customer</th><th>Phone</th><th>Service</th><th>Pickup Date</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="bookingsTable">
+              <tr data-status="delivered"><td>#B001</td><td>Priya Sharma</td><td>9876543210</td><td>Home Laundry</td><td>13 Mar 2026</td><td>₹480</td><td><span class="badge b-d">Delivered</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Viewing #B001')">View</button></td></tr>
+              <tr data-status="progress"><td>#B002</td><td>Hotel Amber</td><td>9812345678</td><td>Restaurant</td><td>13 Mar 2026</td><td>₹1,200</td><td><span class="badge b-pr">In Progress</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Viewing #B002')">View</button></td></tr>
+              <tr data-status="pending"><td>#B003</td><td>Glow Salon</td><td>9998887776</td><td>Salon &amp; Spa</td><td>14 Mar 2026</td><td>₹360</td><td><span class="badge b-p">Pending</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Viewing #B003')">View</button></td></tr>
+              <tr data-status="pending"><td>#B004</td><td>Dr. Mehta Clinic</td><td>9765432109</td><td>Hospital</td><td>14 Mar 2026</td><td>₹2,400</td><td><span class="badge b-p">Pending</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Viewing #B004')">View</button></td></tr>
+              <tr data-status="delivered"><td>#B005</td><td>Sunita Verma</td><td>9123456780</td><td>Express</td><td>12 Mar 2026</td><td>₹750</td><td><span class="badge b-d">Delivered</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Viewing #B005')">View</button></td></tr>
+              <tr data-status="delivered"><td>#A001</td><td>Rahul Joshi</td><td>9876501234</td><td>Home Laundry</td><td>10 Mar 2026</td><td>₹200</td><td><span class="badge b-d">Delivered</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Viewing #A001')">View</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: CUSTOMERS ════ -->
+    <div class="page" id="page-customers">
+      <div class="sec-bar">
+        <h3>👥 All Customers</h3>
+        <input class="search-input" type="text" placeholder="Search customers…" oninput="searchTable('customersTable',this.value)"/>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));">
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-blue">👥</div></div><div class="stat-val">342</div><div class="stat-lbl">Total Customers</div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-green">✅</div></div><div class="stat-val">298</div><div class="stat-lbl">Active</div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-yellow">🏢</div></div><div class="stat-val">44</div><div class="stat-lbl">Commercial</div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-purple">🆕</div></div><div class="stat-val">12</div><div class="stat-lbl">New This Month</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Customer</th><th>Phone</th><th>Type</th><th>Total Orders</th><th>Total Spent</th><th>Last Order</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="customersTable">
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:30px;height:30px;border-radius:50%;background:#dbeafe;color:#2563eb;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;">P</div>Priya Sharma</div></td><td>9876543210</td><td>Home</td><td>24</td><td>₹4,800</td><td>13 Mar 2026</td><td><span class="badge b-d">Active</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Viewing Priya Sharma')">View</button></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:30px;height:30px;border-radius:50%;background:#ccfbf1;color:#0f766e;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;">H</div>Hotel Amber</div></td><td>9812341234</td><td>Restaurant</td><td>18</td><td>₹21,600</td><td>13 Mar 2026</td><td><span class="badge b-d">Active</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Viewing Hotel Amber')">View</button></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:30px;height:30px;border-radius:50%;background:#fdf4ff;color:#7e22ce;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;">G</div>Glow Salon</div></td><td>9998887776</td><td>Salon &amp; Spa</td><td>12</td><td>₹4,320</td><td>13 Mar 2026</td><td><span class="badge b-d">Active</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Viewing Glow Salon')">View</button></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:30px;height:30px;border-radius:50%;background:#fee2e2;color:#dc2626;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;">C</div>City Hospital</div></td><td>9765432109</td><td>Hospital</td><td>32</td><td>₹76,800</td><td>13 Mar 2026</td><td><span class="badge b-d">Active</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Viewing City Hospital')">View</button></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:30px;height:30px;border-radius:50%;background:#fef9c3;color:#d97706;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;">S</div>Sunita Verma</div></td><td>9123456780</td><td>Home</td><td>8</td><td>₹1,600</td><td>12 Mar 2026</td><td><span class="badge b-d">Active</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Viewing Sunita Verma')">View</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: MEMBERS ════ -->
+    <div class="page" id="page-members">
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));">
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-purple">👑</div><span class="stat-badge sb-up">↑ 3%</span></div><div class="stat-val">86</div><div class="stat-lbl">Active Members</div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-green">💰</div></div><div class="stat-val">₹1,032</div><div class="stat-lbl">Monthly Revenue</div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-yellow">🎁</div></div><div class="stat-val">₹3,840</div><div class="stat-lbl">Cashback Given</div></div>
+      </div>
+      <div class="sec-bar"><h3>👑 Active Members</h3><button class="btn btn-blue btn-sm" onclick="showToast('Membership report exported!')">📥 Export</button></div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Member</th><th>Phone</th><th>Joined</th><th>Plan</th><th>Cashback</th><th>Next Renewal</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:30px;height:30px;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;">P</div>Priya Sharma</div></td><td>9876543210</td><td>Jan 2026</td><td>₹12/month</td><td>₹48</td><td>16 Apr 2026</td><td><span class="badge b-d">Active</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Viewing member')">View</button></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:30px;height:30px;border-radius:50%;background:#8b5cf6;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;">R</div>Rahul Joshi</div></td><td>9812345678</td><td>Feb 2026</td><td>₹12/month</td><td>₹12</td><td>18 Apr 2026</td><td><span class="badge b-d">Active</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Viewing member')">View</button></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:30px;height:30px;border-radius:50%;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;">A</div>Anjali Verma</div></td><td>9998887776</td><td>Mar 2026</td><td>₹12/month</td><td>₹0</td><td>15 Apr 2026</td><td><span class="badge b-new">New</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Viewing member')">View</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: PRICE MANAGEMENT ════ -->
+    <div class="page" id="page-prices">
+      <div class="sec-bar">
+        <h3>💰 Price Management</h3>
+        <button class="btn btn-blue btn-sm" onclick="openModal('addPriceModal')">+ Add Item</button>
+      </div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Category</th><th>Item</th><th>Price</th><th>Unit</th><th>Actions</th></tr></thead>
+            <tbody id="priceTable">
+              <tr data-id="1"><td>Home</td><td>Single Bed Sheet</td><td class="price-cell">₹15</td><td>per piece</td><td><button class="btn-edit" onclick="openEditPrice(this,'Single Bed Sheet','15')">✏️ Edit</button> <button class="btn-del" onclick="deletePrice(this)">🗑️ Delete</button></td></tr>
+              <tr data-id="2"><td>Home</td><td>Double Bed Sheet</td><td class="price-cell">₹20</td><td>per piece</td><td><button class="btn-edit" onclick="openEditPrice(this,'Double Bed Sheet','20')">✏️ Edit</button> <button class="btn-del" onclick="deletePrice(this)">🗑️ Delete</button></td></tr>
+              <tr data-id="3"><td>Home</td><td>Pillow Cover</td><td class="price-cell">₹8</td><td>per piece</td><td><button class="btn-edit" onclick="openEditPrice(this,'Pillow Cover','8')">✏️ Edit</button> <button class="btn-del" onclick="deletePrice(this)">🗑️ Delete</button></td></tr>
+              <tr data-id="4"><td>Home</td><td>Towel</td><td class="price-cell">₹15</td><td>per piece</td><td><button class="btn-edit" onclick="openEditPrice(this,'Towel','15')">✏️ Edit</button> <button class="btn-del" onclick="deletePrice(this)">🗑️ Delete</button></td></tr>
+              <tr data-id="5"><td>Home</td><td>Bathrobe</td><td class="price-cell">₹30</td><td>per piece</td><td><button class="btn-edit" onclick="openEditPrice(this,'Bathrobe','30')">✏️ Edit</button> <button class="btn-del" onclick="deletePrice(this)">🗑️ Delete</button></td></tr>
+              <tr data-id="6"><td>Home</td><td>Window Curtain</td><td class="price-cell">₹50</td><td>per piece</td><td><button class="btn-edit" onclick="openEditPrice(this,'Window Curtain','50')">✏️ Edit</button> <button class="btn-del" onclick="deletePrice(this)">🗑️ Delete</button></td></tr>
+              <tr data-id="7"><td>Restaurant</td><td>Table Cloth</td><td class="price-cell">₹20</td><td>per piece</td><td><button class="btn-edit" onclick="openEditPrice(this,'Table Cloth','20')">✏️ Edit</button> <button class="btn-del" onclick="deletePrice(this)">🗑️ Delete</button></td></tr>
+              <tr data-id="8"><td>Restaurant</td><td>Table Napkin</td><td class="price-cell">₹6</td><td>per piece</td><td><button class="btn-edit" onclick="openEditPrice(this,'Table Napkin','6')">✏️ Edit</button> <button class="btn-del" onclick="deletePrice(this)">🗑️ Delete</button></td></tr>
+              <tr data-id="9"><td>Restaurant</td><td>Chair Cover</td><td class="price-cell">₹25</td><td>per piece</td><td><button class="btn-edit" onclick="openEditPrice(this,'Chair Cover','25')">✏️ Edit</button> <button class="btn-del" onclick="deletePrice(this)">🗑️ Delete</button></td></tr>
+              <tr data-id="10"><td>Salon</td><td>Spa Gown / Kimono</td><td class="price-cell">₹30</td><td>per piece</td><td><button class="btn-edit" onclick="openEditPrice(this,'Spa Gown','30')">✏️ Edit</button> <button class="btn-del" onclick="deletePrice(this)">🗑️ Delete</button></td></tr>
+              <tr data-id="11"><td>Salon</td><td>Body Towel</td><td class="price-cell">₹15</td><td>per piece</td><td><button class="btn-edit" onclick="openEditPrice(this,'Body Towel','15')">✏️ Edit</button> <button class="btn-del" onclick="deletePrice(this)">🗑️ Delete</button></td></tr>
+              <tr data-id="12"><td>Hospital</td><td>Patient Gown</td><td class="price-cell">₹30</td><td>per piece</td><td><button class="btn-edit" onclick="openEditPrice(this,'Patient Gown','30')">✏️ Edit</button> <button class="btn-del" onclick="deletePrice(this)">🗑️ Delete</button></td></tr>
+              <tr data-id="13"><td>Hospital</td><td>OT Scrubs</td><td class="price-cell">₹30</td><td>per set</td><td><button class="btn-edit" onclick="openEditPrice(this,'OT Scrubs','30')">✏️ Edit</button> <button class="btn-del" onclick="deletePrice(this)">🗑️ Delete</button></td></tr>
+              <tr data-id="14"><td>Hospital</td><td>Blanket</td><td class="price-cell">₹150</td><td>per piece</td><td><button class="btn-edit" onclick="openEditPrice(this,'Blanket','150')">✏️ Edit</button> <button class="btn-del" onclick="deletePrice(this)">🗑️ Delete</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: INVOICES ════ -->
+    <div class="page" id="page-invoices">
+      <div class="sec-bar">
+        <h3>🧾 Invoices</h3>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <select class="filter-sel"><option>All</option><option>Paid</option><option>Pending</option></select>
+          <button class="btn btn-blue btn-sm" onclick="showToast('Invoice generated!')">+ Generate Invoice</button>
+        </div>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));">
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-green">✅</div></div><div class="stat-val">₹38,420</div><div class="stat-lbl">Paid This Month</div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-yellow">⏳</div></div><div class="stat-val">₹9,900</div><div class="stat-lbl">Pending Payment</div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-blue">🧾</div></div><div class="stat-val">42</div><div class="stat-lbl">Total Invoices</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Invoice #</th><th>Customer</th><th>Service</th><th>Amount</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td>INV-001</td><td>Priya Sharma</td><td>Home Laundry</td><td>₹480</td><td>10 Mar 2026</td><td><span class="badge b-d">Paid</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Downloading INV-001…')">📥 Download</button></td></tr>
+              <tr><td>INV-002</td><td>Hotel Amber</td><td>Restaurant</td><td>₹1,200</td><td>11 Mar 2026</td><td><span class="badge b-p">Pending</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Reminder sent!')">💬 Remind</button></td></tr>
+              <tr><td>INV-003</td><td>Glow Salon</td><td>Salon &amp; Spa</td><td>₹360</td><td>12 Mar 2026</td><td><span class="badge b-d">Paid</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Downloading INV-003…')">📥 Download</button></td></tr>
+              <tr><td>INV-004</td><td>City Hospital</td><td>Hospital</td><td>₹2,400</td><td>12 Mar 2026</td><td><span class="badge b-p">Pending</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Reminder sent!')">💬 Remind</button></td></tr>
+              <tr><td>INV-005</td><td>Sunita Verma</td><td>Express</td><td>₹750</td><td>13 Mar 2026</td><td><span class="badge b-d">Paid</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Downloading INV-005…')">📥 Download</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: SERVICES ════ -->
+    <div class="page" id="page-services">
+      <div class="sec-bar"><h3>📦 Service Categories</h3><button class="btn btn-blue btn-sm" onclick="showToast('Service added!')">+ Add Service</button></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.1rem;">
+        <div class="card">
+          <div class="card-head"><h3>🏠 Home Laundry</h3><span class="badge b-d">Active</span></div>
+          <div class="card-body">
+            <div style="font-size:.82rem;color:var(--gray-500);margin-bottom:.75rem;">9 items • Avg ₹25/piece</div>
+            <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.4rem;"><span>Bookings this month</span><strong>58</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:.82rem;"><span>Revenue</span><strong>₹14,500</strong></div>
+            <button class="btn btn-out btn-full" style="margin-top:.85rem;border-radius:9px;" onclick="goPage('prices',document.querySelector('[data-page=prices]'))">Manage Prices</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>🍽️ Restaurant &amp; Banquet</h3><span class="badge b-d">Active</span></div>
+          <div class="card-body">
+            <div style="font-size:.82rem;color:var(--gray-500);margin-bottom:.75rem;">5 items • Avg ₹27/piece</div>
+            <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.4rem;"><span>Bookings this month</span><strong>32</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:.82rem;"><span>Revenue</span><strong>₹12,000</strong></div>
+            <button class="btn btn-out btn-full" style="margin-top:.85rem;border-radius:9px;" onclick="goPage('prices',document.querySelector('[data-page=prices]'))">Manage Prices</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>💆 Salon &amp; Spa</h3><span class="badge b-d">Active</span></div>
+          <div class="card-body">
+            <div style="font-size:.82rem;color:var(--gray-500);margin-bottom:.75rem;">6 items • Avg ₹16/piece</div>
+            <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.4rem;"><span>Bookings this month</span><strong>23</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:.82rem;"><span>Revenue</span><strong>₹8,280</strong></div>
+            <button class="btn btn-out btn-full" style="margin-top:.85rem;border-radius:9px;" onclick="goPage('prices',document.querySelector('[data-page=prices]'))">Manage Prices</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>🏥 Hospital &amp; Clinic</h3><span class="badge b-d">Active</span></div>
+          <div class="card-body">
+            <div style="font-size:.82rem;color:var(--gray-500);margin-bottom:.75rem;">6 items • Avg ₹57/piece</div>
+            <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.4rem;"><span>Bookings this month</span><strong>15</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:.82rem;"><span>Revenue</span><strong>₹13,540</strong></div>
+            <button class="btn btn-out btn-full" style="margin-top:.85rem;border-radius:9px;" onclick="goPage('prices',document.querySelector('[data-page=prices]'))">Manage Prices</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>⚡ Express Laundry</h3><span class="badge b-d">Active</span></div>
+          <div class="card-body">
+            <div style="font-size:.82rem;color:var(--gray-500);margin-bottom:.75rem;">24hr turnaround • Premium pricing</div>
+            <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.4rem;"><span>Bookings this month</span><strong>22</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:.82rem;"><span>Revenue</span><strong>₹8,800</strong></div>
+            <button class="btn btn-blue btn-full" style="margin-top:.85rem;border-radius:9px;" onclick="showToast('Express settings saved!')">Configure</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>👑 Membership Plan</h3><span class="badge b-d">Active</span></div>
+          <div class="card-body">
+            <div style="font-size:.82rem;color:var(--gray-500);margin-bottom:.75rem;">₹12/month • 86 active members</div>
+            <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.4rem;"><span>Monthly revenue</span><strong>₹1,032</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:.82rem;"><span>Cashback given</span><strong>₹3,840</strong></div>
+            <button class="btn btn-out btn-full" style="margin-top:.85rem;border-radius:9px;" onclick="goPage('members',document.querySelector('[data-page=members]'))">View Members</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: MANAGER ACCOUNTS ════ -->
+    <div class="page" id="page-managers">
+      <div class="sec-bar">
+        <h3>👷 Manager Accounts</h3>
+        <button class="btn btn-blue btn-sm" onclick="openModal('addManagerModal')">+ Add Manager</button>
+      </div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="managersTable">
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:32px;height:32px;border-radius:50%;background:#0f766e;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;">R</div><div><div style="font-size:.84rem;font-weight:600;color:var(--gray-900);">Ravi Manager</div><div style="font-size:.72rem;color:var(--gray-500);">manager@shona.com</div></div></div></td>
+                <td>manager@shona.com</td><td>9812345678</td><td>10 Jan 2026</td>
+                <td><span class="badge b-d">Active</span></td>
+                <td>
+                  <button class="btn-edit" onclick="showToast('Editing Ravi Manager')">✏️ Edit</button>
+                  <button class="btn-del" style="margin-left:.3rem;" onclick="removeManager(this,'Ravi Manager')">🗑️ Remove</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card" style="background:var(--blue-l);border-color:#bfdbfe;">
+        <div class="card-body">
+          <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+            <span style="font-size:1.5rem;">ℹ️</span>
+            <div>
+              <div style="font-size:.85rem;font-weight:700;color:var(--blue);margin-bottom:.2rem;">Admin Permissions</div>
+              <div style="font-size:.8rem;color:var(--gray-700);">As Admin, you can add and remove managers. Managers can handle pickups, deliveries and customer operations. Managers cannot access pricing or admin settings.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: DELIVERY STAFF ════ -->
+    <div class="page" id="page-staff">
+      <div class="sec-bar"><h3>🚗 Delivery Staff</h3><button class="btn btn-blue btn-sm" onclick="showToast('Staff added!')">+ Add Staff</button></div>
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));">
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-teal">🚗</div></div><div class="stat-val">3</div><div class="stat-lbl">Total Staff</div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-green">✅</div></div><div class="stat-val">2</div><div class="stat-lbl">On Duty Today</div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-blue">📦</div></div><div class="stat-val">51</div><div class="stat-lbl">Deliveries This Month</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Staff</th><th>Phone</th><th>Area</th><th>Today's Jobs</th><th>Month Total</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:32px;height:32px;border-radius:50%;background:#0f766e;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;">R</div>Ravi Kumar</div></td><td>9876500001</td><td>Freeganj</td><td>3</td><td>18</td><td><span class="badge b-pr">On Duty</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Editing Ravi Kumar')">Edit</button></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:32px;height:32px;border-radius:50%;background:#134e4a;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;">S</div>Suresh Patel</div></td><td>9876500002</td><td>Mahakal Rd</td><td>2</td><td>17</td><td><span class="badge b-t">In Transit</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Editing Suresh Patel')">Edit</button></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:32px;height:32px;border-radius:50%;background:#5eead4;color:#134e4a;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;">M</div>Mohan Singh</div></td><td>9876500003</td><td>Dewas Rd</td><td>0</td><td>16</td><td><span class="badge b-d">Available</span></td><td><button class="btn-edit btn-sm" onclick="showToast('Editing Mohan Singh')">Edit</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: REVENUE REPORTS ════ -->
+    <div class="page" id="page-reports">
+      <div class="sec-bar">
+        <h3>📈 Revenue Reports</h3>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <select class="filter-sel"><option>This Month</option><option>Last Month</option><option>This Quarter</option><option>This Year</option></select>
+          <button class="btn btn-blue btn-sm" onclick="showToast('Report exported as PDF!')">📥 Export PDF</button>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-green">💰</div><span class="stat-badge sb-up">↑ 8%</span></div><div class="stat-val">₹48,320</div><div class="stat-lbl">Total Revenue</div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-blue">📋</div><span class="stat-badge sb-up">↑ 12%</span></div><div class="stat-val">128</div><div class="stat-lbl">Total Orders</div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-yellow">💵</div></div><div class="stat-val">₹378</div><div class="stat-lbl">Avg Order Value</div></div>
+        <div class="stat-card"><div class="stat-top"><div class="stat-ico si-purple">👑</div></div><div class="stat-val">₹1,032</div><div class="stat-lbl">Membership Revenue</div></div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-box">
+          <h4>📊 Revenue by Month</h4>
+          <div class="bars">
+            <div class="bar-col"><div class="bar" style="height:60%"></div><span class="bar-lbl">Sep</span></div>
+            <div class="bar-col"><div class="bar" style="height:70%"></div><span class="bar-lbl">Oct</span></div>
+            <div class="bar-col"><div class="bar" style="height:55%"></div><span class="bar-lbl">Nov</span></div>
+            <div class="bar-col"><div class="bar" style="height:82%"></div><span class="bar-lbl">Dec</span></div>
+            <div class="bar-col"><div class="bar" style="height:76%"></div><span class="bar-lbl">Jan</span></div>
+            <div class="bar-col"><div class="bar" style="height:91%"></div><span class="bar-lbl">Feb</span></div>
+            <div class="bar-col"><div class="bar" style="height:100%;background:linear-gradient(180deg,#16a34a,#22c55e)"></div><span class="bar-lbl">Mar</span></div>
+          </div>
+        </div>
+        <div class="chart-box">
+          <h4>💰 Revenue by Service</h4>
+          <div class="progress-list">
+            <div><div class="pi-top"><span>🏠 Home Laundry</span><strong>₹14,500</strong></div><div class="pi-bar"><div class="pi-fill" style="width:58%;background:#2563eb;"></div></div></div>
+            <div><div class="pi-top"><span>🍽️ Restaurant</span><strong>₹12,000</strong></div><div class="pi-bar"><div class="pi-fill" style="width:48%;background:#0ea5e9;"></div></div></div>
+            <div><div class="pi-top"><span>🏥 Hospital</span><strong>₹13,540</strong></div><div class="pi-bar"><div class="pi-fill" style="width:55%;background:#10b981;"></div></div></div>
+            <div><div class="pi-top"><span>💆 Salon &amp; Spa</span><strong>₹8,280</strong></div><div class="pi-bar"><div class="pi-fill" style="width:33%;background:#8b5cf6;"></div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="card-head" style="padding:.9rem 1.35rem;border-bottom:1px solid var(--gray-100);"><h3 style="font-size:.93rem;font-weight:700;color:var(--gray-900);">📋 Top Customers by Revenue</h3></div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Customer</th><th>Type</th><th>Orders</th><th>Total Spent</th><th>Avg/Order</th></tr></thead>
+            <tbody>
+              <tr><td>City Hospital</td><td>Hospital</td><td>32</td><td>₹76,800</td><td>₹2,400</td></tr>
+              <tr><td>Hotel Amber</td><td>Restaurant</td><td>18</td><td>₹21,600</td><td>₹1,200</td></tr>
+              <tr><td>Priya Sharma</td><td>Home</td><td>24</td><td>₹4,800</td><td>₹200</td></tr>
+              <tr><td>Glow Salon</td><td>Salon</td><td>12</td><td>₹4,320</td><td>₹360</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: SETTINGS ════ -->
+    <div class="page" id="page-settings">
+      <div class="settings-section">
+        <div class="ss-head">🏢 Business Information</div>
+        <div class="ss-body">
+          <div class="form-grid">
+            <div class="fg"><label>Business Name</label><input type="text" value="Shona Laundry"/></div>
+            <div class="fg"><label>Phone Number</label><input type="tel" value="+91 91066 66146"/></div>
+            <div class="fg"><label>Email</label><input type="email" value="ShonaLaundry@gmail.com"/></div>
+            <div class="fg"><label>WhatsApp</label><input type="tel" value="+91 91066 66146"/></div>
+            <div class="fg fg-full"><label>Address</label><input type="text" value="Teen Batti, near Anishvilla, Ujjain – 456001, MP"/></div>
+          </div>
+          <div style="margin-top:.75rem;"><button class="btn btn-blue" onclick="showToast('✅ Business info saved!')">💾 Save Changes</button></div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="ss-head">⚙️ System Settings</div>
+        <div class="ss-body">
+          <div class="ss-row">
+            <div><div class="ss-label">Auto WhatsApp Notifications</div><div class="ss-val">Send order updates automatically</div></div>
+            <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="ss-row">
+            <div><div class="ss-label">Login Popup Auto-show</div><div class="ss-val">Show login popup after 4 seconds</div></div>
+            <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="ss-row">
+            <div><div class="ss-label">Express Delivery Surcharge</div><div class="ss-val">Add 20% for express orders</div></div>
+            <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="ss-row">
+            <div><div class="ss-label">Membership Cashback Active</div><div class="ss-val">Apply cashback to member orders</div></div>
+            <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="ss-head">🔒 Security</div>
+        <div class="ss-body">
+          <div class="form-grid">
+            <div class="fg"><label>Current Password</label><input type="password" placeholder="••••••••"/></div>
+            <div class="fg"><label>New Password</label><input type="password" placeholder="••••••••"/></div>
+            <div class="fg fg-full"><label>Confirm New Password</label><input type="password" placeholder="••••••••"/></div>
+          </div>
+          <div style="margin-top:.75rem;"><button class="btn btn-out" onclick="showToast('✅ Password updated!')">🔒 Update Password</button></div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="ss-head" style="color:var(--red);">⚠️ Danger Zone</div>
+        <div class="ss-body">
+          <div class="ss-row">
+            <div><div class="ss-label">Logout from Admin Panel</div><div class="ss-val">You will need to sign in again</div></div>
+            <button class="btn btn-sm" style="background:#fee2e2;color:var(--red);border:none;cursor:pointer;font-family:var(--font);padding:.3rem .75rem;border-radius:7px;font-size:.75rem;font-weight:600;" onclick="doLogout()">🚪 Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ════ ADD MANAGER MODAL ════ -->
+<div class="modal-overlay" id="addManagerModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>👷 Add New Manager</h3>
+      <button class="modal-close" onclick="closeModal('addManagerModal')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="fg fg-full"><label>Full Name *</label><input type="text" id="mgr-name" placeholder="Manager's full name"/></div>
+      <div class="fg"><label>Email *</label><input type="email" id="mgr-email" placeholder="manager@email.com"/></div>
+      <div class="fg"><label>Phone *</label><input type="tel" id="mgr-phone" placeholder="9XXXXXXXXX"/></div>
+      <div class="fg"><label>Password *</label><input type="password" id="mgr-pass" placeholder="Min 6 characters"/></div>
+      <div class="fg"><label>Confirm Password *</label><input type="password" id="mgr-pass2" placeholder="Repeat password"/></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-out" onclick="closeModal('addManagerModal')">Cancel</button>
+      <button class="btn btn-blue" onclick="addManager()">✅ Add Manager</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ EDIT PRICE MODAL ════ -->
+<div class="modal-overlay" id="editPriceModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>✏️ Edit Price</h3>
+      <button class="modal-close" onclick="closeModal('editPriceModal')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="fg fg-full"><label>Item Name</label><input type="text" id="edit-item" readonly style="background:#f1f5f9;"/></div>
+      <div class="fg fg-full"><label>New Price (₹) *</label><input type="number" id="edit-price" placeholder="Enter new price" min="1"/></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-out" onclick="closeModal('editPriceModal')">Cancel</button>
+      <button class="btn btn-blue" onclick="savePrice()">💾 Save Price</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ ADD BOOKING MODAL ════ -->
+<div class="modal-overlay" id="addBookingModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>📋 New Booking</h3>
+      <button class="modal-close" onclick="closeModal('addBookingModal')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="fg"><label>Customer Name *</label><input type="text" placeholder="Full name"/></div>
+      <div class="fg"><label>Phone *</label><input type="tel" placeholder="9XXXXXXXXX"/></div>
+      <div class="fg fg-full"><label>Address *</label><input type="text" placeholder="Pickup address"/></div>
+      <div class="fg"><label>Service *</label>
+        <select><option value="" disabled selected>Select service</option><option>Home Laundry</option><option>Restaurant</option><option>Salon &amp; Spa</option><option>Hospital</option><option>Express</option></select>
+      </div>
+      <div class="fg"><label>Pickup Date *</label><input type="date"/></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-out" onclick="closeModal('addBookingModal')">Cancel</button>
+      <button class="btn btn-blue" onclick="showToast('✅ Booking created!');closeModal('addBookingModal')">✅ Create Booking</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── Init ─────────────────────────── */
+document.addEventListener('DOMContentLoaded', function() {
+  var user = ShonaAuth.guard('admin');
+  if (!user) return;
+  var nameEl = document.getElementById('adminName');
+  var avEl   = document.getElementById('adminAv');
+  if (nameEl) nameEl.textContent = user.name;
+  if (avEl)   avEl.textContent   = user.name.charAt(0).toUpperCase();
+});
+
+/* ── Page Navigation ─────────────── */
+var PAGE_NAMES = {
+  dashboard:'Dashboard', bookings:'All Bookings', customers:'Customers',
+  members:'Members', prices:'Price Management', invoices:'Invoices',
+  services:'Services', managers:'Manager Accounts', staff:'Delivery Staff',
+  reports:'Revenue Reports', settings:'Settings'
+};
+
+function goPage(id, navEl) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  var target = document.getElementById('page-' + id);
+  if (target) target.classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(function(i){ i.classList.remove('active'); });
+  if (navEl) navEl.classList.add('active');
+  var pn = document.getElementById('pageName');
+  if (pn) pn.textContent = PAGE_NAMES[id] || id;
+  window.scrollTo({ top:0, behavior:'smooth' });
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+/* ── Mobile Sidebar ──────────────── */
+document.getElementById('menuToggle').addEventListener('click', function() {
+  document.getElementById('sidebar').classList.toggle('open');
+});
+document.getElementById('sidebar').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+
+/* ── Filter Bookings ─────────────── */
+function filterBookings(filter) {
+  document.querySelectorAll('#bookingsTable tr').forEach(function(row) {
+    row.style.display = (filter === 'all' || row.dataset.status === filter) ? '' : 'none';
+  });
+}
+
+/* ── Search Table ────────────────── */
+function searchTable(tableId, val) {
+  val = val.toLowerCase();
+  document.querySelectorAll('#' + tableId + ' tr').forEach(function(row) {
+    row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+  });
+}
+
+/* ── Add Manager ─────────────────── */
+function addManager() {
+  var name  = document.getElementById('mgr-name').value.trim();
+  var email = document.getElementById('mgr-email').value.trim();
+  var phone = document.getElementById('mgr-phone').value.trim();
+  var pass  = document.getElementById('mgr-pass').value;
+  var pass2 = document.getElementById('mgr-pass2').value;
+
+  if (!name || !email || !phone || !pass) { showToast('⚠️ Please fill all required fields'); return; }
+  if (pass !== pass2) { showToast('⚠️ Passwords do not match'); return; }
+  if (pass.length < 6) { showToast('⚠️ Password must be at least 6 characters'); return; }
+
+  var tbody = document.getElementById('managersTable');
+  var init  = name.charAt(0).toUpperCase();
+  var row   = document.createElement('tr');
+  row.innerHTML =
+    '<td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:32px;height:32px;border-radius:50%;background:#0f766e;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;">' + init + '</div><div><div style="font-size:.84rem;font-weight:600;color:var(--gray-900);">' + name + '</div><div style="font-size:.72rem;color:var(--gray-500);">' + email + '</div></div></div></td>' +
+    '<td>' + email + '</td><td>' + phone + '</td>' +
+    '<td>' + new Date().toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) + '</td>' +
+    '<td><span class="badge b-d">Active</span></td>' +
+    '<td><button class="btn-edit" onclick="showToast(\'Editing ' + name + '\')">✏️ Edit</button> <button class="btn-del" style="margin-left:.3rem;" onclick="removeManager(this,\'' + name + '\')">🗑️ Remove</button></td>';
+  tbody.appendChild(row);
+
+  // Clear form
+  ['mgr-name','mgr-email','mgr-phone','mgr-pass','mgr-pass2'].forEach(function(id){ document.getElementById(id).value = ''; });
+  closeModal('addManagerModal');
+  showToast('✅ Manager "' + name + '" added successfully!');
+}
+
+/* ── Remove Manager ──────────────── */
+function removeManager(btn, name) {
+  if (!confirm('Remove manager "' + name + '"? They will lose dashboard access.')) return;
+  var row = btn.closest('tr');
+  row.style.transition = 'opacity .3s';
+  row.style.opacity = '0';
+  setTimeout(function(){ row.remove(); }, 300);
+  showToast('✅ Manager "' + name + '" removed.');
+}
+
+/* ── Price Management ────────────── */
+var editingRow = null;
+function openEditPrice(btn, item, price) {
+  editingRow = btn.closest('tr');
+  document.getElementById('edit-item').value  = item;
+  document.getElementById('edit-price').value = price;
+  openModal('editPriceModal');
+}
+function savePrice() {
+  var newPrice = document.getElementById('edit-price').value.trim();
+  if (!newPrice || isNaN(newPrice) || Number(newPrice) < 1) { showToast('⚠️ Enter a valid price'); return; }
+  if (editingRow) {
+    var priceCell = editingRow.querySelector('.price-cell');
+    if (priceCell) priceCell.textContent = '₹' + newPrice;
+  }
+  closeModal('editPriceModal');
+  showToast('✅ Price updated to ₹' + newPrice);
+}
+function deletePrice(btn) {
+  var row = btn.closest('tr');
+  var item = row.cells[1] ? row.cells[1].textContent : 'item';
+  if (!confirm('Delete "' + item + '" from price list?')) return;
+  row.style.transition = 'opacity .3s';
+  row.style.opacity = '0';
+  setTimeout(function(){ row.remove(); }, 300);
+  showToast('🗑️ "' + item + '" deleted from price list.');
+}
+
+/* ── Modal helpers ───────────────── */
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('.modal-overlay').forEach(function(o) {
+  o.addEventListener('click', function(e){ if (e.target === o) closeModal(o.id); });
+});
+
+/* ── Logout ──────────────────────── */
+function doLogout() {
+  if (confirm('Are you sure you want to logout?')) {
+    ShonaAuth.logout();
+    window.location.href = '../index.html';
+  }
+}
+
+/* ── Toast ───────────────────────── */
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+</script>
+</body>
+</html>
